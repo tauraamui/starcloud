@@ -10,10 +10,11 @@ const (
 )
 
 struct Matrix {
-	position_x f32
-	position_y f32
 	cols int
 	rows int
+mut:
+	position_x f32
+	position_y f32
 }
 
 fn (matrix Matrix) draw(ops op.Stack, gfx &gg.Context) {
@@ -28,16 +29,28 @@ fn (matrix Matrix) draw(ops op.Stack, gfx &gg.Context) {
 	}
 }
 
-fn (matrix Matrix) on_event(e &gg.Event) bool {
+fn (mut matrix Matrix) on_event(ops op.Stack, e &gg.Event) bool {
 	match e.typ {
 		.mouse_move {
+			if !matrix.contains_point(ops, e.mouse_x, e.mouse_y) { return false }
 			if e.mouse_button == gg.MouseButton.left {
 				println(e.mouse_x)
+				return true
+			}
+			if e.mouse_button == gg.MouseButton.right {
+				matrix.position_x += e.mouse_dx
+				matrix.position_y += e.mouse_dy
 				return true
 			}
 		}
 		else {}
 	}
+	return false
+}
+
+fn (matrix Matrix) contains_point(ops op.Stack, pt_x f32, pt_y f32) bool {
+	area := matrix.area(ops)
+	if pt_x > area.x && pt_x < area.x + area.width && pt_y > area.y && pt_y < area.y + area.height { return true }
 	return false
 }
 

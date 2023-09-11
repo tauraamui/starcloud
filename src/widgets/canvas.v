@@ -34,14 +34,8 @@ pub fn (mut canvas Canvas) draw(gfx &gg.Context) {
 }
 
 pub fn (mut canvas Canvas) on_event(e &gg.Event, v voidptr) {
-	for _, m in canvas.matrices {
-		if m.on_event(e) { return }
+	for _, mut m in canvas.matrices {
+		if m.on_event(canvas.ops, e) { return }
 	}
-}
-
-fn within_area(ops op.Stack, ptx f32, pty f32, area gg.Rect) bool {
-	areax, areay := ops.offset(area.x, area.y)
-	if ptx > areax && ptx < areax + area.width && pty > areay && pty < areay + area.height { return true }
-	return false
 }
 
