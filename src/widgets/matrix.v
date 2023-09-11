@@ -15,6 +15,7 @@ struct Matrix {
 mut:
 	position_x f32
 	position_y f32
+	is_dragging bool
 }
 
 fn (matrix Matrix) draw(ops op.Stack, gfx &gg.Context) {
@@ -31,17 +32,21 @@ fn (matrix Matrix) draw(ops op.Stack, gfx &gg.Context) {
 
 fn (mut matrix Matrix) on_event(ops op.Stack, e &gg.Event) bool {
 	match e.typ {
-		.mouse_move {
+		.mouse_down {
 			if !matrix.contains_point(ops, e.mouse_x, e.mouse_y) { return false }
-			if e.mouse_button == gg.MouseButton.left {
-				println(e.mouse_x)
-				return true
-			}
 			if e.mouse_button == gg.MouseButton.right {
+				matrix.is_dragging = true
+			}
+		}
+		.mouse_move {
+			if matrix.is_dragging {
 				matrix.position_x += e.mouse_dx
 				matrix.position_y += e.mouse_dy
 				return true
 			}
+		}
+		.mouse_up {
+			matrix.is_dragging = false
 		}
 		else {}
 	}
