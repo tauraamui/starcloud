@@ -10,7 +10,6 @@ mut:
 	world_offset_x f32
 	world_offset_y f32
 	matrices []Matrix
-	is_panning bool
 
 	evt_area gg.Rect
 }
@@ -35,22 +34,14 @@ pub fn (mut canvas Canvas) draw(gfx &gg.Context) {
 }
 
 pub fn (mut canvas Canvas) on_event(e &gg.Event, v voidptr) {
-	match e.typ {
-		.mouse_down {
-			if e.mouse_button == gg.MouseButton.right {
-				canvas.is_panning = true
-			}
-		}
-		.mouse_up {
-			canvas.is_panning = false
-		}
-		.mouse_move {
-			if canvas.is_panning {
-				canvas.world_offset_x += e.mouse_dx
-				canvas.world_offset_y += e.mouse_dy
-			}
-		}
-		else {}
+	for _, m in canvas.matrices {
+		if m.on_event(e) { return }
 	}
+}
+
+fn within_area(ops op.Stack, ptx f32, pty f32, area gg.Rect) bool {
+	areax, areay := ops.offset(area.x, area.y)
+	if ptx > areax && ptx < areax + area.width && pty > areay && pty < areay + area.height { return true }
+	return false
 }
 

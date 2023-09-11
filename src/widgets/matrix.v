@@ -28,6 +28,26 @@ fn (matrix Matrix) draw(ops op.Stack, gfx &gg.Context) {
 	}
 }
 
+fn (matrix Matrix) on_event(e &gg.Event) bool {
+	match e.typ {
+		.mouse_move {
+			if e.mouse_button == gg.MouseButton.left {
+				println(e.mouse_x)
+				return true
+			}
+		}
+		else {}
+	}
+	return false
+}
+
+fn (matrix Matrix) area(ops op.Stack) gg.Rect {
+	posx, posy := ops.offset(matrix.position_x, matrix.position_y)
+	width := matrix.cols * cell_width
+	height := matrix.rows * cell_height
+	return gg.Rect{ x: posx, y: posy, width: width, height: height }
+}
+
 fn (matrix Matrix) clip(posx f32, posy f32, gfx &gg.Context) {
 	width := matrix.cols * cell_width
 	height := matrix.rows * cell_height
