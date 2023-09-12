@@ -21,7 +21,6 @@ mut:
 	selection_begin_pos_y f32
 	selection_width f32
 	selection_height f32
-	focused_selection_area gg.Rect
 }
 
 fn (matrix Matrix) draw(ops op.Stack, gfx &gg.Context) {
@@ -37,6 +36,19 @@ fn (matrix Matrix) draw(ops op.Stack, gfx &gg.Context) {
 
 	if matrix.selection_begin_pos_x != 0 && matrix.selection_begin_pos_y != 0 && matrix.selection_width != 0 && matrix.selection_height != 0 {
 		gfx.draw_rect_filled(matrix.selection_begin_pos_x, matrix.selection_begin_pos_y, matrix.selection_width, matrix.selection_height, gx.rgba(224, 63, 222, 80))
+	}
+}
+
+fn (mut matrix Matrix) resolve_selected_cells(ops op.Stack) {
+	posx, posy := ops.offset(matrix.position_x, matrix.position_y)
+	selection := gg.Rect{ x: matrix.selection_begin_pos_x, y: matrix.selection_begin_pos_y, width: matrix.selection_width, height: matrix.selection_height }
+	for x in 0..matrix.cols {
+		for y in 0..matrix.rows {
+			cell := gg.Rect{ x: posx + (x*cell_width), y: posy + (y*cell_height), width: cell_width, height: cell_height }
+			if overlaps(selection, cell) {
+				println("X: ${cell.x}, Y: ${cell.y}")
+			}
+		}
 	}
 }
 
