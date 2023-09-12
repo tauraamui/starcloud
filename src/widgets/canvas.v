@@ -52,8 +52,8 @@ pub fn (mut canvas Canvas) on_event(e &gg.Event, v voidptr) {
 		}
 		.mouse_move {
 			if canvas.is_dragging {
-				canvas.world_offset_x += e.mouse_dx
-				canvas.world_offset_y += e.mouse_dy
+				canvas.world_offset_x += e.mouse_dx / gg.dpi_scale()
+				canvas.world_offset_y += e.mouse_dy / gg.dpi_scale()
 			}
 		}
 		.mouse_up {
