@@ -70,7 +70,6 @@ fn (matrix Matrix) draw(ops op.Stack, gfx &gg.Context) {
 	defer { matrix.noclip(gfx) }
 	for x in 0..matrix.cols {
 		for y in 0..matrix.rows {
-			mut is_selected := false
 			gfx.draw_rect_filled(posx + (x*cell_width), posy + (y*cell_height), cell_width, cell_height, gx.rgb(245, 245, 245))
 			gfx.draw_rect_empty(posx + (x*cell_width), posy + (y*cell_height), cell_width, cell_height, gx.rgb(115, 115, 115))
 		}
@@ -78,7 +77,7 @@ fn (matrix Matrix) draw(ops op.Stack, gfx &gg.Context) {
 
 	for _, cell in matrix.selected_cells {
 		x, y := cell.x, cell.y
-		gfx.draw_rect_empty(posx + (x*cell_width), posy + (y*cell_height), cell_width, cell_height, gx.rgb(255, 115, 115))
+		draw_rect_empty_with_thickness(gfx, posx + (x*cell_width)-1, posy + (y*cell_height)-1, cell_width+1, cell_height+1, 1, gx.rgb(255, 64, 188))
 	}
 
 	if matrix.is_selecting {
@@ -88,6 +87,36 @@ fn (matrix Matrix) draw(ops op.Stack, gfx &gg.Context) {
 		}
 	}
 }
+
+fn draw_rect_empty_with_thickness(gfx &gg.Context, x f32, y f32, w f32, h f32, t int, c gx.Color) {
+	cfg := gg.PenConfig{
+		color: c,
+		line_type: .solid,
+		thickness: t,
+	}
+	gfx.draw_line_with_config(x, y, x+w, y, cfg)
+	gfx.draw_line_with_config(x+w, y, x+w, y+h, cfg)
+	gfx.draw_line_with_config(x+w, y+h, x, y+h, cfg)
+	gfx.draw_line_with_config(x, y+h, x, y, cfg)
+}
+
+
+/*
+draw_rect_empty(x f32, y f32, w f32, h f32, c gx.Color) {
+	if c.a != 255 {
+		sgl.load_pipeline(ctx.pipeline.alpha)
+	}
+	sgl.c4b(c.r, c.g, c.b, c.a)
+
+	sgl.begin_line_strip()
+	sgl.v2f(x * ctx.scale, y * ctx.scale)
+	sgl.v2f((x + w) * ctx.scale, y * ctx.scale)
+	sgl.v2f((x + w) * ctx.scale, (y + h) * ctx.scale)
+	sgl.v2f(x * ctx.scale, (y + h) * ctx.scale)
+	sgl.v2f(x * ctx.scale, (y - 1) * ctx.scale)
+	sgl.end()
+}
+*/
 
 fn (mut matrix Matrix) resolve_selected_cells(ops op.Stack) {
 	selection_area := matrix.selection_area.normalise()
