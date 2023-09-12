@@ -50,7 +50,7 @@ fn main() {
 fn frame(mut app &App) {
 	app.gg.begin()
 	app.gg.show_fps()
-	app.canvas.draw(app.gg)
+	app.canvas.draw(mut app.gg)
 	app.gg.end()
 }
 

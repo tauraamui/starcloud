@@ -15,6 +15,8 @@ mut:
 	is_dragging bool
 
 	evt_area gg.Rect
+
+	zoom_amount f32
 }
 
 pub fn Canvas.new() Canvas {
@@ -28,7 +30,7 @@ pub fn Canvas.new() Canvas {
 	}
 }
 
-pub fn (mut canvas Canvas) draw(gfx &gg.Context) {
+pub fn (mut canvas Canvas) draw(mut gfx &gg.Context) {
 	canvas.ops.push_offset(canvas.world_offset_x, canvas.world_offset_y)
 	defer { canvas.ops.pop_offset() }
 	for _, m in canvas.matrices {
@@ -44,6 +46,10 @@ pub fn (mut canvas Canvas) on_event(e &gg.Event, v voidptr) {
 	}
 
 	match e.typ {
+		.mouse_scroll {
+			canvas.zoom_amount += (e.scroll_y) / 100
+			println(canvas.zoom_amount)
+		}
 		.mouse_down {
 			if e.mouse_button == gg.MouseButton.right {
 				sapp.set_mouse_cursor(sapp.MouseCursor.resize_all)
