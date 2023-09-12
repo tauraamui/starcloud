@@ -33,15 +33,15 @@ fn (matrix Matrix) draw(ops op.Stack, gfx &gg.Context) {
 fn (mut matrix Matrix) on_event(ops op.Stack, e &gg.Event) bool {
 	match e.typ {
 		.mouse_down {
-			if !matrix.contains_point(ops, e.mouse_x, e.mouse_y) { return false }
+			if !matrix.contains_point(ops, e.mouse_x / gg.dpi_scale(), e.mouse_y / gg.dpi_scale()) { return false }
 			if e.mouse_button == gg.MouseButton.right {
 				matrix.is_dragging = true
 			}
 		}
 		.mouse_move {
 			if matrix.is_dragging {
-				matrix.position_x += e.mouse_dx
-				matrix.position_y += e.mouse_dy
+				matrix.position_x += (e.mouse_dx / gg.dpi_scale())
+				matrix.position_y += (e.mouse_dy / gg.dpi_scale())
 				return true
 			}
 		}
