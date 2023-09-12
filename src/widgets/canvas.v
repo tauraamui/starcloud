@@ -16,7 +16,7 @@ mut:
 
 pub fn Canvas.new() Canvas {
 	return Canvas{
-		world_offset_x: 0
+		world_offset_x: 20
 		world_offset_y: 0
 		matrices: [
 			Matrix{ position_x: 10, position_y: 10, cols: 2, rows: 4 }
@@ -34,8 +34,10 @@ pub fn (mut canvas Canvas) draw(gfx &gg.Context) {
 }
 
 pub fn (mut canvas Canvas) on_event(e &gg.Event, v voidptr) {
-	for _, mut m in canvas.matrices {
-		if m.on_event(canvas.ops, e) { return }
+	canvas.ops.push_offset(canvas.world_offset_x, canvas.world_offset_y)
+	defer { canvas.ops.pop_offset() }
+	for i := canvas.matrices.len-1; i >= 0; i-- {
+		if canvas.matrices[i].on_event(canvas.ops, e) { return }
 	}
 }
 
