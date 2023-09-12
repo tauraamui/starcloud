@@ -2,6 +2,7 @@ module widgets
 
 import gg
 import op
+import sokol.sapp
 
 [heap]
 pub struct Canvas {
@@ -10,6 +11,8 @@ mut:
 	world_offset_x f32
 	world_offset_y f32
 	matrices []Matrix
+
+	is_dragging bool
 
 	evt_area gg.Rect
 }
@@ -38,6 +41,26 @@ pub fn (mut canvas Canvas) on_event(e &gg.Event, v voidptr) {
 	defer { canvas.ops.pop_offset() }
 	for i := canvas.matrices.len-1; i >= 0; i-- {
 		if canvas.matrices[i].on_event(canvas.ops, e) { return }
+	}
+
+	match e.typ {
+		.mouse_down {
+			if e.mouse_button == gg.MouseButton.right {
+				sapp.set_mouse_cursor(sapp.MouseCursor.resize_all)
+				canvas.is_dragging = true
+			}
+		}
+		.mouse_move {
+			if canvas.is_dragging {
+				canvas.world_offset_x += e.mouse_dx
+				canvas.world_offset_y += e.mouse_dy
+			}
+		}
+		.mouse_up {
+			canvas.is_dragging = false
+			sapp.set_mouse_cursor(sapp.MouseCursor.default)
+		}
+		else {}
 	}
 }
 
