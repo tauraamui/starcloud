@@ -20,7 +20,7 @@ mut:
 	is_selecting bool
 	selection_area Span
 
-	selected_cells []Span
+	selected_cells []Pt
 }
 
 struct Pt {
@@ -73,14 +73,14 @@ fn (matrix Matrix) draw(ops op.Stack, gfx &gg.Context) {
 			mut is_selected := false
 			gfx.draw_rect_filled(posx + (x*cell_width), posy + (y*cell_height), cell_width, cell_height, gx.rgb(245, 245, 245))
 			for _, cell in matrix.selected_cells {
-				if cell.min.x == posx + (x*cell_width) && cell.min.y == posy + (y*cell_height) && cell.max.x == posx + (x*cell_width) + cell_width && cell.max.y == posy + (y*cell_height) + cell_height {
+				if cell.x == x && cell.y == y {
 					is_selected = true
 				}
 			}
 			if is_selected {
-				gfx.draw_rect_empty(posx + (x*cell_width)+1, posy + (y*cell_height)+1, cell_width-1, cell_height-1, gx.rgb(255, 115, 115))
+				gfx.draw_rect_empty(posx + (x*cell_width), posy + (y*cell_height), cell_width, cell_height, gx.rgb(255, 115, 115))
 			} else {
-				gfx.draw_rect_empty(posx + (x*cell_width)+1, posy + (y*cell_height)+1, cell_width-1, cell_height-1, gx.rgba(115, 115, 115, 100))
+				gfx.draw_rect_empty(posx + (x*cell_width), posy + (y*cell_height), cell_width, cell_height, gx.rgb(115, 115, 115))
 			}
 		}
 	}
@@ -103,7 +103,7 @@ fn (mut matrix Matrix) resolve_selected_cells(ops op.Stack) {
 			max := Pt{ x: min.x + cell_width, y: min.y + cell_height }
 			cell := Span{ min: min, max: max }
 			if cell.overlaps(selection_area) {
-				matrix.selected_cells << cell
+				matrix.selected_cells << Pt{ x: x, y: y }
 			}
 		}
 	}
