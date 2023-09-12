@@ -53,6 +53,13 @@ fn (span Span) empty() bool {
 	return span.min.x >= span.max.x || span.min.y >= span.max.y
 }
 
+fn (span Span) overlaps(s Span) bool {
+	println("\n-----------------\nSPAN: ${span}, CELL: ${s}")
+	return !span.empty() && !s.empty() &&
+		span.min.x < s.max.x && s.min.x < span.max.x &&
+		span.min.y < s.max.y && s.min.y < span.max.y
+}
+
 struct Cell {
 	x int
 	y int
@@ -82,19 +89,19 @@ fn (matrix Matrix) draw(ops op.Stack, gfx &gg.Context) {
 }
 
 fn (mut matrix Matrix) resolve_selected_cells(ops op.Stack) {
-	/*
+	selection_area := matrix.selection_area.normalise()
 	matrix.selected_cells = []
 	posx, posy := ops.offset(matrix.position_x, matrix.position_y)
-	selection := gg.Rect{ x: matrix.selection_begin_pos_x, y: matrix.selection_begin_pos_y, width: matrix.selection_width, height: matrix.selection_height }
 	for x in 0..matrix.cols {
 		for y in 0..matrix.rows {
-			cell := gg.Rect{ x: posx + (x*cell_width), y: posy + (y*cell_height), width: cell_width, height: cell_height }
-			if overlaps(selection, cell) {
+			min := Pt{ x: posx + (x*cell_width), y: posy + (y*cell_height) }
+			max := Pt{ x: min.x + cell_width, y: min.y + cell_height }
+			cell := Span{ min: min, max: max }
+			if cell.overlaps(selection_area) {
 				matrix.selected_cells << Cell{x: x, y: y}
 			}
 		}
 	}
-	*/
 }
 
 fn (mut matrix Matrix) on_event(ops op.Stack, e &gg.Event) bool {
@@ -139,9 +146,9 @@ fn (mut matrix Matrix) on_event(ops op.Stack, e &gg.Event) bool {
 			sapp.set_mouse_cursor(sapp.MouseCursor.default)
 			matrix.is_dragging = false
 			if matrix.is_selecting {
+				println("****************************************")
 				matrix.is_selecting = false
 				matrix.resolve_selected_cells(ops)
-				println(matrix.selection_area.normalise())
 				matrix.selection_area = Span{}
 			}
 		}
