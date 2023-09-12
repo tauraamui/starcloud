@@ -46,8 +46,10 @@ fn (mut matrix Matrix) resolve_selected_cells(ops op.Stack) {
 	for x in 0..matrix.cols {
 		for y in 0..matrix.rows {
 			cell := gg.Rect{ x: posx + (x*cell_width), y: posy + (y*cell_height), width: cell_width, height: cell_height }
-			// println("selection: ${selection}, cell: ${cell}")
-			if overlaps(selection, cell) { println("X: ${cell.x}, Y: ${cell.y}") }
+			if overlaps(selection, cell) {
+				if x == 0 && y == 0 { println("---------------\nselection: ${selection}, cell: ${cell}") }
+			}
+			//if overlaps(selection, cell) { println("X: ${cell.x}, Y: ${cell.y}") }
 		}
 	}
 }
@@ -95,6 +97,40 @@ fn (mut matrix Matrix) on_event(ops op.Stack, e &gg.Event) bool {
 	}
 	return false
 }
+
+/*
+type Rectangle struct {
+	Min, Max f32.Point
+}
+
+func (r *Rectangle) SwappedBounds() Rectangle {
+	min, max := r.Min, r.Max
+	if max.X < min.X {
+		max.X = r.Min.X
+		min.X = r.Max.X
+	}
+	if max.Y < min.Y {
+		max.Y = r.Min.Y
+		min.Y = r.Max.Y
+	}
+	return Rectangle{Min: min, Max: max}
+}
+
+func (r *Rectangle) Empty() bool {
+	return r.Min.X >= r.Max.X || r.Min.Y >= r.Max.Y
+}
+
+// Overlaps reports whether r and s have a non-empty intersection.
+func (r *Rectangle) Overlaps(s Rectangle) bool {
+	return !r.Empty() && !s.Empty() &&
+		r.Min.X < s.Max.X && s.Min.X < r.Max.X &&
+		r.Min.Y < s.Max.Y && s.Min.Y < r.Max.Y
+}
+
+func (r *Rectangle) ConvertToPixelspace(dp func(v unit.Dp) int) image.Rectangle {
+	return image.Rect(dp(unit.Dp(r.Min.X)), dp(unit.Dp(r.Min.Y)), dp(unit.Dp(r.Max.X)), dp(unit.Dp(r.Max.Y)))
+}
+*/
 
 fn overlaps(r1 gg.Rect, r2 gg.Rect) bool {
 	return r1.x < r2.width && r2.x < r1.width && r1.y < r2.height && r2.y < r1.height
