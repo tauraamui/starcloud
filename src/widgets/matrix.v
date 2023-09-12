@@ -21,6 +21,7 @@ mut:
 	selection_begin_pos_y f32
 	selection_width f32
 	selection_height f32
+	focused_selection_area gg.Rect
 }
 
 fn (matrix Matrix) draw(ops op.Stack, gfx &gg.Context) {
@@ -75,6 +76,10 @@ fn (mut matrix Matrix) on_event(ops op.Stack, e &gg.Event) bool {
 		else {}
 	}
 	return false
+}
+
+fn overlaps(r1 gg.Rect, r2 gg.Rect) bool {
+	return r1.x < r2.width && r2.x < r1.width && r1.y < r2.height && r2.y < r1.height
 }
 
 fn (matrix Matrix) contains_point(ops op.Stack, pt_x f32, pt_y f32) bool {
