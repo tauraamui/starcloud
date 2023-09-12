@@ -66,23 +66,19 @@ struct Cell {
 
 fn (matrix Matrix) draw(ops op.Stack, gfx &gg.Context) {
 	posx, posy := ops.offset(matrix.position_x, matrix.position_y)
-	matrix.clip(posx, posy, gfx)
+	matrix.clip(posx, posy, gfx) // TODO:(tauraamui) -> expand clip by 1 px to allow for elapsed cell border draws
 	defer { matrix.noclip(gfx) }
 	for x in 0..matrix.cols {
 		for y in 0..matrix.rows {
 			mut is_selected := false
 			gfx.draw_rect_filled(posx + (x*cell_width), posy + (y*cell_height), cell_width, cell_height, gx.rgb(245, 245, 245))
-			for _, cell in matrix.selected_cells {
-				if cell.x == x && cell.y == y {
-					is_selected = true
-				}
-			}
-			if is_selected {
-				gfx.draw_rect_empty(posx + (x*cell_width), posy + (y*cell_height), cell_width, cell_height, gx.rgb(255, 115, 115))
-			} else {
-				gfx.draw_rect_empty(posx + (x*cell_width), posy + (y*cell_height), cell_width, cell_height, gx.rgb(115, 115, 115))
-			}
+			gfx.draw_rect_empty(posx + (x*cell_width), posy + (y*cell_height), cell_width, cell_height, gx.rgb(115, 115, 115))
 		}
+	}
+
+	for _, cell in matrix.selected_cells {
+		x, y := cell.x, cell.y
+		gfx.draw_rect_empty(posx + (x*cell_width), posy + (y*cell_height), cell_width, cell_height, gx.rgb(255, 115, 115))
 	}
 
 	if matrix.is_selecting {
