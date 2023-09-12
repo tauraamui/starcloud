@@ -18,12 +18,39 @@ mut:
 	position_y f32
 	is_dragging bool
 	is_selecting bool
-	selection_begin_pos_x f32
-	selection_begin_pos_y f32
-	selection_width f32
-	selection_height f32
+	selection_area Span
 
 	selected_cells []Cell
+}
+
+struct Pt {
+mut:
+	x f32
+	y f32
+}
+
+struct Span {
+mut:
+	min Pt
+	max Pt
+}
+
+fn (span Span) normalise() Span {
+	mut min, mut max := span.min, span.max
+	if max.x < min.x {
+		max.x = span.min.x
+		min.x = span.max.x
+	}
+
+	if max.y < min.y {
+		max.y = span.min.y
+		min.y = span.max.y
+	}
+	return Span{ min: min, max: max }
+}
+
+fn (span Span) empty() bool {
+	return span.min.x >= span.max.x || span.min.y >= span.max.y
 }
 
 struct Cell {
@@ -48,12 +75,14 @@ fn (matrix Matrix) draw(ops op.Stack, gfx &gg.Context) {
 		}
 	}
 
-	if matrix.selection_begin_pos_x != 0 && matrix.selection_begin_pos_y != 0 && matrix.selection_width != 0 && matrix.selection_height != 0 {
-		gfx.draw_rect_filled(matrix.selection_begin_pos_x, matrix.selection_begin_pos_y, matrix.selection_width, matrix.selection_height, gx.rgba(224, 63, 222, 80))
+	selection_area := matrix.selection_area.normalise()
+	if !selection_area.empty() {
+		gfx.draw_rect_filled(selection_area.min.x, selection_area.min.y, selection_area.max.x-selection_area.min.x, selection_area.max.y-selection_area.min.y, gx.rgba(224, 63, 222, 80))
 	}
 }
 
 fn (mut matrix Matrix) resolve_selected_cells(ops op.Stack) {
+	/*
 	matrix.selected_cells = []
 	posx, posy := ops.offset(matrix.position_x, matrix.position_y)
 	selection := gg.Rect{ x: matrix.selection_begin_pos_x, y: matrix.selection_begin_pos_y, width: matrix.selection_width, height: matrix.selection_height }
@@ -65,6 +94,7 @@ fn (mut matrix Matrix) resolve_selected_cells(ops op.Stack) {
 			}
 		}
 	}
+	*/
 }
 
 fn (mut matrix Matrix) on_event(ops op.Stack, e &gg.Event) bool {
@@ -79,8 +109,16 @@ fn (mut matrix Matrix) on_event(ops op.Stack, e &gg.Event) bool {
 				.left {
 					sapp.set_mouse_cursor(sapp.MouseCursor.crosshair)
 					matrix.is_selecting = true
-					matrix.selection_begin_pos_x = e.mouse_x / gg.dpi_scale()
-					matrix.selection_begin_pos_y = e.mouse_y / gg.dpi_scale()
+					matrix.selection_area = Span{
+						min: Pt{
+							x: e.mouse_x / gg.dpi_scale(),
+							y: e.mouse_y / gg.dpi_scale()
+						},
+						max: Pt{
+							x: e.mouse_x / gg.dpi_scale(),
+							y: e.mouse_y / gg.dpi_scale()
+						}
+					}
 				}
 				else {}
 			}
@@ -93,8 +131,8 @@ fn (mut matrix Matrix) on_event(ops op.Stack, e &gg.Event) bool {
 			}
 
 			if matrix.is_selecting {
-				matrix.selection_width += (e.mouse_dx / gg.dpi_scale())
-				matrix.selection_height += (e.mouse_dy / gg.dpi_scale())
+				matrix.selection_area.max.x += (e.mouse_dx / gg.dpi_scale())
+				matrix.selection_area.max.y += (e.mouse_dy / gg.dpi_scale())
 			}
 		}
 		.mouse_up {
@@ -103,7 +141,8 @@ fn (mut matrix Matrix) on_event(ops op.Stack, e &gg.Event) bool {
 			if matrix.is_selecting {
 				matrix.is_selecting = false
 				matrix.resolve_selected_cells(ops)
-				matrix.selection_width, matrix.selection_height = 0, 0
+				println(matrix.selection_area.normalise())
+				matrix.selection_area = Span{}
 			}
 		}
 		else {}
@@ -145,8 +184,17 @@ func (r *Rectangle) ConvertToPixelspace(dp func(v unit.Dp) int) image.Rectangle 
 }
 */
 
-fn overlaps(r1 gg.Rect, r2 gg.Rect) bool {
-	return r1.x < r2.width && r2.x < r1.width && r1.y < r2.height && r2.y < r1.height
+fn overlaps(r gg.Rect, s gg.Rect) bool {
+	return false
+	/*
+	nr := normalise_bounds(r)
+	ns := normalise_bounds(s)
+	return 
+		r.x < s.x+s.width && s.x < r.x+r.width &&
+		r.y < s.y+s.height && s.y < r.y+r.height
+		r.x < s.x+s.width && s.x < r.x+r.width &&
+		r.y < s.height && s.y < r.height
+	*/
 }
 
 fn (matrix Matrix) contains_point(ops op.Stack, pt_x f32, pt_y f32) bool {
