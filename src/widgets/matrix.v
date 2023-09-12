@@ -3,6 +3,7 @@ module widgets
 import gg
 import gx
 import op
+import sokol.sapp
 
 const (
 	cell_width = 80
@@ -45,9 +46,8 @@ fn (mut matrix Matrix) resolve_selected_cells(ops op.Stack) {
 	for x in 0..matrix.cols {
 		for y in 0..matrix.rows {
 			cell := gg.Rect{ x: posx + (x*cell_width), y: posy + (y*cell_height), width: cell_width, height: cell_height }
-			if overlaps(selection, cell) {
-				println("X: ${cell.x}, Y: ${cell.y}")
-			}
+			// println("selection: ${selection}, cell: ${cell}")
+			if overlaps(selection, cell) { println("X: ${cell.x}, Y: ${cell.y}") }
 		}
 	}
 }
@@ -58,9 +58,11 @@ fn (mut matrix Matrix) on_event(ops op.Stack, e &gg.Event) bool {
 			if !matrix.contains_point(ops, e.mouse_x / gg.dpi_scale(), e.mouse_y / gg.dpi_scale()) { return false }
 			match e.mouse_button {
 				.right {
+					sapp.set_mouse_cursor(sapp.MouseCursor.resize_all)
 					matrix.is_dragging = true
 				}
 				.left {
+					sapp.set_mouse_cursor(sapp.MouseCursor.crosshair)
 					matrix.is_selecting = true
 					matrix.selection_begin_pos_x = e.mouse_x / gg.dpi_scale()
 					matrix.selection_begin_pos_y = e.mouse_y / gg.dpi_scale()
@@ -81,8 +83,10 @@ fn (mut matrix Matrix) on_event(ops op.Stack, e &gg.Event) bool {
 			}
 		}
 		.mouse_up {
+			sapp.set_mouse_cursor(sapp.MouseCursor.default)
 			matrix.is_dragging = false
 			matrix.is_selecting = false
+			matrix.resolve_selected_cells(ops)
 			matrix.selection_width, matrix.selection_height = 0, 0
 		}
 		else {}
