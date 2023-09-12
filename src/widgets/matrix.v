@@ -54,7 +54,6 @@ fn (span Span) empty() bool {
 }
 
 fn (span Span) overlaps(s Span) bool {
-	println("\n-----------------\nSPAN: ${span}, CELL: ${s}")
 	return !span.empty() && !s.empty() &&
 		span.min.x < s.max.x && s.min.x < span.max.x &&
 		span.min.y < s.max.y && s.min.y < span.max.y
@@ -79,16 +78,18 @@ fn (matrix Matrix) draw(ops op.Stack, gfx &gg.Context) {
 				}
 			}
 			if is_selected {
-				gfx.draw_rect_empty(posx + (x*cell_width), posy + (y*cell_height), cell_width, cell_height, gx.rgb(255, 115, 115))
+				gfx.draw_rect_empty(posx + (x*cell_width)+1, posy + (y*cell_height)+1, cell_width-1, cell_height-1, gx.rgb(255, 115, 115))
 			} else {
-				gfx.draw_rect_empty(posx + (x*cell_width), posy + (y*cell_height), cell_width, cell_height, gx.rgba(115, 115, 115, 100))
+				gfx.draw_rect_empty(posx + (x*cell_width)+1, posy + (y*cell_height)+1, cell_width-1, cell_height-1, gx.rgba(115, 115, 115, 100))
 			}
 		}
 	}
 
-	selection_area := matrix.selection_area.normalise()
-	if !selection_area.empty() {
-		gfx.draw_rect_filled(selection_area.min.x, selection_area.min.y, selection_area.max.x-selection_area.min.x, selection_area.max.y-selection_area.min.y, gx.rgba(224, 63, 222, 80))
+	if matrix.is_selecting {
+		selection_area := matrix.selection_area.normalise()
+		if !selection_area.empty() {
+			gfx.draw_rect_filled(selection_area.min.x, selection_area.min.y, selection_area.max.x-selection_area.min.x, selection_area.max.y-selection_area.min.y, gx.rgba(224, 63, 222, 80))
+		}
 	}
 }
 
@@ -115,11 +116,14 @@ fn (mut matrix Matrix) on_event(ops op.Stack, e &gg.Event) bool {
 			match e.mouse_button {
 				.right {
 					sapp.set_mouse_cursor(sapp.MouseCursor.resize_all)
+					matrix.is_selecting = false
 					matrix.is_dragging = true
+					return true
 				}
 				.left {
 					sapp.set_mouse_cursor(sapp.MouseCursor.crosshair)
 					matrix.is_selecting = true
+					matrix.is_dragging = false
 					matrix.selection_area = Span{
 						min: Pt{
 							x: e.mouse_x / gg.dpi_scale(),
@@ -130,6 +134,7 @@ fn (mut matrix Matrix) on_event(ops op.Stack, e &gg.Event) bool {
 							y: e.mouse_y / gg.dpi_scale()
 						}
 					}
+					return true
 				}
 				else {}
 			}
@@ -144,16 +149,15 @@ fn (mut matrix Matrix) on_event(ops op.Stack, e &gg.Event) bool {
 			if matrix.is_selecting {
 				matrix.selection_area.max.x += (e.mouse_dx / gg.dpi_scale())
 				matrix.selection_area.max.y += (e.mouse_dy / gg.dpi_scale())
+				return true
 			}
 		}
 		.mouse_up {
 			sapp.set_mouse_cursor(sapp.MouseCursor.default)
 			matrix.is_dragging = false
 			if matrix.is_selecting {
-				println("****************************************")
 				matrix.is_selecting = false
 				matrix.resolve_selected_cells(ops)
-				matrix.selection_area = Span{}
 			}
 		}
 		else {}
