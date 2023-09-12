@@ -16,6 +16,11 @@ mut:
 	position_x f32
 	position_y f32
 	is_dragging bool
+	is_selecting bool
+	selection_begin_pos_x f32
+	selection_begin_pos_y f32
+	selection_width f32
+	selection_height f32
 }
 
 fn (matrix Matrix) draw(ops op.Stack, gfx &gg.Context) {
@@ -28,14 +33,26 @@ fn (matrix Matrix) draw(ops op.Stack, gfx &gg.Context) {
 			gfx.draw_rect_empty(posx + (x*cell_width), posy + (y*cell_height), cell_width, cell_height, gx.rgba(115, 115, 115, 100))
 		}
 	}
+
+	if matrix.selection_begin_pos_x != 0 && matrix.selection_begin_pos_y != 0 && matrix.selection_width != 0 && matrix.selection_height != 0 {
+		gfx.draw_rect_filled(matrix.selection_begin_pos_x, matrix.selection_begin_pos_y, matrix.selection_width, matrix.selection_height, gx.rgba(224, 63, 222, 80))
+	}
 }
 
 fn (mut matrix Matrix) on_event(ops op.Stack, e &gg.Event) bool {
 	match e.typ {
 		.mouse_down {
 			if !matrix.contains_point(ops, e.mouse_x / gg.dpi_scale(), e.mouse_y / gg.dpi_scale()) { return false }
-			if e.mouse_button == gg.MouseButton.right {
-				matrix.is_dragging = true
+			match e.mouse_button {
+				.right {
+					matrix.is_dragging = true
+				}
+				.left {
+					matrix.is_selecting = true
+					matrix.selection_begin_pos_x = e.mouse_x / gg.dpi_scale()
+					matrix.selection_begin_pos_y = e.mouse_y / gg.dpi_scale()
+				}
+				else {}
 			}
 		}
 		.mouse_move {
@@ -44,9 +61,16 @@ fn (mut matrix Matrix) on_event(ops op.Stack, e &gg.Event) bool {
 				matrix.position_y += (e.mouse_dy / gg.dpi_scale())
 				return true
 			}
+
+			if matrix.is_selecting {
+				matrix.selection_width += (e.mouse_dx / gg.dpi_scale())
+				matrix.selection_height += (e.mouse_dy / gg.dpi_scale())
+			}
 		}
 		.mouse_up {
 			matrix.is_dragging = false
+			matrix.is_selecting = false
+			matrix.selection_width, matrix.selection_height = 0, 0
 		}
 		else {}
 	}
