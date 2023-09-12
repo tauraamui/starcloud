@@ -85,9 +85,11 @@ fn (mut matrix Matrix) on_event(ops op.Stack, e &gg.Event) bool {
 		.mouse_up {
 			sapp.set_mouse_cursor(sapp.MouseCursor.default)
 			matrix.is_dragging = false
-			matrix.is_selecting = false
-			matrix.resolve_selected_cells(ops)
-			matrix.selection_width, matrix.selection_height = 0, 0
+			if matrix.is_selecting {
+				matrix.is_selecting = false
+				matrix.resolve_selected_cells(ops)
+				matrix.selection_width, matrix.selection_height = 0, 0
+			}
 		}
 		else {}
 	}
