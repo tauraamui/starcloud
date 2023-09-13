@@ -4,17 +4,56 @@ import op
 import gg
 import gx
 
+pub struct Button {
+	area Span
+	is_pressed bool
+	icon_char string
+}
+
+pub fn (button Button) draw(ops op.Stack, gfx &gg.Context) {
+	min := button.area.min.offset(ops)
+	button.clip(min.x, min.y, gfx)
+	defer { button.noclip(gfx) }
+
+	gfx.draw_rounded_rect_filled(min.x, min.y, button.area.max.x, button.area.max.y, 6, gx.rgb(172, 155, 238))
+}
+
+fn (button Button) clip(posx f32, posy f32, gfx &gg.Context) {
+	gfx.scissor_rect(int(posx), int(posy), int(button.area.max.x), int(button.area.max.y))
+}
+
+fn (button Button) noclip(gfx &gg.Context) {
+	gfx.scissor_rect(0,0,0,0)
+}
+
 pub struct Toolbar {
 pub:
 	area Span
+mut:
+	buttons []Button
 }
 
-pub fn (mut toolbar Toolbar) draw(ops op.Stack, gfx &gg.Context) {
+pub fn Toolbar.new() Toolbar {
+	return Toolbar{
+		area: widgets.Span{ min: widgets.Pt{0, 8}, max: widgets.Pt{250, 35} }
+		buttons: [
+			Button{ area: Span{ min: Pt{ 5, 5 }, max: Pt{ x: 25, y: 25 } } }
+		]
+	}
+}
+
+pub fn (mut toolbar Toolbar) draw(mut ops op.Stack, gfx &gg.Context) {
 	min := toolbar.area.min.offset(ops)
 	toolbar.clip(min.x, min.y, gfx)
 	defer { toolbar.noclip(gfx) }
 
-	gfx.draw_rounded_rect_filled(min.x, min.y, toolbar.area.max.x, toolbar.area.max.y, 3.9, gx.rgb(7, 7, 7))
+	gfx.draw_rounded_rect_filled(min.x, min.y, toolbar.area.max.x, toolbar.area.max.y, 5, gx.rgb(7, 7, 7))
+
+	ops.push_offset(toolbar.area.min.x, toolbar.area.min.y)
+	defer { ops.pop_offset() }
+	for _, b in toolbar.buttons {
+		b.draw(ops, gfx)
+	}
 }
 
 pub fn(mut toolbar Toolbar) on_event(ops op.Stack, e &gg.Event) bool {
@@ -38,6 +77,6 @@ fn (toolbar Toolbar) clip(posx f32, posy f32, gfx &gg.Context) {
 	gfx.scissor_rect(int(posx), int(posy), int(toolbar.area.max.x), int(toolbar.area.max.y))
 }
 
-fn (matrix Toolbar) noclip(gfx &gg.Context) {
+fn (toolbar Toolbar) noclip(gfx &gg.Context) {
 	gfx.scissor_rect(0,0,0,0)
 }

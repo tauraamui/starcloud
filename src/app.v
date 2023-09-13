@@ -26,7 +26,7 @@ fn main() {
 	mut app := &App{
 		gg: 0
 		canvas: widgets.Canvas.new()
-		toolbar: widgets.Toolbar{ area: widgets.Span{ min: widgets.Pt{0, 8}, max: widgets.Pt{250, 31.5} } }
+		toolbar: widgets.Toolbar.new()
 	}
 	app.gg = gg.new_context(
 		bg_color: gx.rgb(18, 18, 18)
@@ -48,7 +48,7 @@ fn frame(mut app &App) {
 	app.gg.scale = gg.dpi_scale()
 	win_size := app.gg.window_size()
 	app.ops.push_offset((win_size.width / 2) - (app.toolbar.area.max.x / 2), 0)
-	app.toolbar.draw(app.ops, app.gg)
+	app.toolbar.draw(mut app.ops, app.gg)
 	app.ops.pop_offset()
 	app.gg.end()
 }
