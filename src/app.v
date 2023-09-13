@@ -26,7 +26,7 @@ fn main() {
 	mut app := &App{
 		gg: 0
 		canvas: widgets.Canvas.new()
-		toolbar: widgets.Toolbar{ area: widgets.Span{ min: widgets.Pt{0, 0}, max: widgets.Pt{50, 10} } }
+		toolbar: widgets.Toolbar{ area: widgets.Span{ min: widgets.Pt{0, 8}, max: widgets.Pt{250, 31.5} } }
 	}
 	app.gg = gg.new_context(
 		bg_color: gx.rgb(18, 18, 18)
@@ -45,10 +45,12 @@ fn frame(mut app &App) {
 	app.gg.begin()
 	app.gg.show_fps()
 	app.canvas.draw(mut app.ops, mut app.gg)
-	//win_size := app.gg.window_size()
-	// app.ops.push_offset((win_size.width / 2) - (app.toolbar.size.max.x), 0)
+	app.gg.scale = gg.dpi_scale()
+	win_size := app.gg.window_size()
+	app.ops.push_offset((win_size.width / 2) - (app.toolbar.area.max.x / 2), 0)
+	app.gg.scissor_rect(0, 0, win_size.width, win_size.height)
 	app.toolbar.draw(app.ops, app.gg)
-	//app.ops.pop_offset()
+	app.ops.pop_offset()
 	app.gg.end()
 }
 
