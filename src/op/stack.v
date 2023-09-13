@@ -39,6 +39,6 @@ pub fn (mut stack Stack) push_scalar(s f32) {
 	stack.scalars << s
 }
 
-pub fn (mut stack Stack) pop_scalar(s f32) {
+pub fn (mut stack Stack) pop_scalar() {
 	stack.scalars.pop()
 }
