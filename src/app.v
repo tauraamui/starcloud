@@ -48,7 +48,7 @@ fn frame(mut app &App) {
 	app.gg.scale = gg.dpi_scale()
 	win_size := app.gg.window_size()
 	app.ops.push_offset((win_size.width / 2) - (app.toolbar.area.max.x / 2), 0)
-	app.toolbar.draw(mut app.ops, app.gg)
+	app.toolbar.draw(mut app.ops, mut app.gg)
 	app.ops.pop_offset()
 	app.gg.end()
 }

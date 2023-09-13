@@ -23,7 +23,7 @@ pub fn Canvas.new() Canvas {
 		world_offset_y: 0
 		matrices: [
 			Matrix{ position_x: 10, position_y: 10, cols: 2, rows: 4 }
-			Matrix{ position_x: 10, position_y: 180, cols: 10, rows: 8 }
+			Matrix{ position_x: 10, position_y: 180, cols: 15, rows: 60 }
 		]
 	}
 }
