@@ -12,10 +12,8 @@ pub struct Button {
 
 pub fn (button Button) draw(ops op.Stack, gfx &gg.Context) {
 	min := button.area.min.offset(ops)
-	button.clip(min.x, min.y, gfx)
-	defer { button.noclip(gfx) }
 
-	gfx.draw_rounded_rect_filled(min.x, min.y, button.area.max.x, button.area.max.y, 6, gx.rgb(172, 155, 238))
+	gfx.draw_rounded_rect_filled(min.x, min.y, button.area.max.x, button.area.max.y, 8.9, gx.rgb(172, 155, 238))
 }
 
 fn (button Button) clip(posx f32, posy f32, gfx &gg.Context) {
@@ -35,9 +33,9 @@ mut:
 
 pub fn Toolbar.new() Toolbar {
 	return Toolbar{
-		area: widgets.Span{ min: widgets.Pt{0, 8}, max: widgets.Pt{250, 35} }
+		area: widgets.Span{ min: widgets.Pt{0, 8}, max: widgets.Pt{312.5, 38} }
 		buttons: [
-			Button{ area: Span{ min: Pt{ 5, 5 }, max: Pt{ x: 25, y: 25 } } }
+			Button{ area: Span{ min: Pt{ 5, 0 }, max: Pt{ x: 30, y: 28 } } }
 		]
 	}
 }
@@ -47,12 +45,14 @@ pub fn (mut toolbar Toolbar) draw(mut ops op.Stack, gfx &gg.Context) {
 	toolbar.clip(min.x, min.y, gfx)
 	defer { toolbar.noclip(gfx) }
 
-	gfx.draw_rounded_rect_filled(min.x, min.y, toolbar.area.max.x, toolbar.area.max.y, 5, gx.rgb(7, 7, 7))
+	gfx.draw_rounded_rect_filled(min.x, min.y, toolbar.area.max.x, toolbar.area.max.y, 8.9, gx.rgb(7, 7, 7))
 
 	ops.push_offset(toolbar.area.min.x, toolbar.area.min.y)
 	defer { ops.pop_offset() }
 	for _, b in toolbar.buttons {
+		ops.push_offset(0, (toolbar.area.max.y / 2) - (b.area.max.y / 2))
 		b.draw(ops, gfx)
+		ops.pop_offset()
 	}
 }
 
