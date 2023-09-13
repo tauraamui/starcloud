@@ -13,11 +13,13 @@ mut:
 	matrices []Matrix
 	is_dragging bool
 	zoom_percentage f32
+	scale f32
 }
 
 pub fn Canvas.new() Canvas {
 	return Canvas{
 		zoom_percentage: 100
+		scale: f32(gg.dpi_scale())
 		world_offset_x: 20
 		world_offset_y: 0
 		matrices: [
@@ -28,9 +30,9 @@ pub fn Canvas.new() Canvas {
 }
 
 pub fn (mut canvas Canvas) draw(mut gfx &gg.Context) {
-	current_scale := (canvas.zoom_percentage / 100) * f32(gg.dpi_scale())
-	if gfx.scale != current_scale {
-		gfx.scale = current_scale
+	canvas.scale = (canvas.zoom_percentage / 100) * f32(gg.dpi_scale())
+	if gfx.scale != canvas.scale {
+		gfx.scale = canvas.scale
 	}
 	canvas.ops.push_offset(canvas.world_offset_x, canvas.world_offset_y)
 	defer { canvas.ops.pop_offset() }
@@ -43,7 +45,7 @@ pub fn (mut canvas Canvas) on_event(e &gg.Event, v voidptr) {
 	canvas.ops.push_offset(canvas.world_offset_x, canvas.world_offset_y)
 	defer { canvas.ops.pop_offset() }
 	for i := canvas.matrices.len-1; i >= 0; i-- {
-		if canvas.matrices[i].on_event(canvas.ops, e) { return }
+		if canvas.matrices[i].on_event(canvas.ops, e, canvas.scale) { return }
 	}
 
 	match e.typ {
@@ -63,8 +65,8 @@ pub fn (mut canvas Canvas) on_event(e &gg.Event, v voidptr) {
 		}
 		.mouse_move {
 			if canvas.is_dragging {
-				canvas.world_offset_x += e.mouse_dx / canvas.zoom_percentage
-				canvas.world_offset_y += e.mouse_dy / canvas.zoom_percentage
+				canvas.world_offset_x += e.mouse_dx / canvas.scale
+				canvas.world_offset_y += e.mouse_dy / canvas.scale
 			}
 		}
 		.mouse_up {
