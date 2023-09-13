@@ -7,7 +7,6 @@ import sokol.sapp
 [heap]
 pub struct Canvas {
 mut:
-	ops op.Stack
 	world_offset_x f32
 	world_offset_y f32
 	matrices []Matrix
@@ -29,23 +28,23 @@ pub fn Canvas.new() Canvas {
 	}
 }
 
-pub fn (mut canvas Canvas) draw(mut gfx &gg.Context) {
+pub fn (mut canvas Canvas) draw(mut ops op.Stack, mut gfx &gg.Context) {
 	canvas.scale = (canvas.zoom_percentage / 100) * f32(gg.dpi_scale())
 	if gfx.scale != canvas.scale {
 		gfx.scale = canvas.scale
 	}
-	canvas.ops.push_offset(canvas.world_offset_x, canvas.world_offset_y)
-	defer { canvas.ops.pop_offset() }
+	ops.push_offset(canvas.world_offset_x, canvas.world_offset_y)
+	defer { ops.pop_offset() }
 	for _, m in canvas.matrices {
-		m.draw(canvas.ops, gfx)
+		m.draw(ops, gfx)
 	}
 }
 
-pub fn (mut canvas Canvas) on_event(e &gg.Event, v voidptr) {
-	canvas.ops.push_offset(canvas.world_offset_x, canvas.world_offset_y)
-	defer { canvas.ops.pop_offset() }
+pub fn (mut canvas Canvas) on_event(e &gg.Event, mut ops op.Stack) {
+	ops.push_offset(canvas.world_offset_x, canvas.world_offset_y)
+	defer { ops.pop_offset() }
 	for i := canvas.matrices.len-1; i >= 0; i-- {
-		if canvas.matrices[i].on_event(canvas.ops, e, canvas.scale) { return }
+		if canvas.matrices[i].on_event(ops, e, canvas.scale) { return }
 	}
 
 	match e.typ {
