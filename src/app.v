@@ -54,6 +54,10 @@ fn frame(mut app &App) {
 }
 
 fn on_event(e &gg.Event, mut app &App) {
+	app.ops.push_offset((gg.window_size().width / 2) - (app.toolbar.area.max.x / 2), 0)
+	captured := app.toolbar.on_event(app.ops, e)
+	app.ops.pop_offset()
+	if captured { return }
 	app.canvas.on_event(e, mut app.ops)
 }
 
