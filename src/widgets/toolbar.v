@@ -14,7 +14,7 @@ pub fn (mut toolbar Toolbar) draw(ops op.Stack, gfx &gg.Context) {
 	toolbar.clip(min.x, min.y, gfx)
 	defer { toolbar.noclip(gfx) }
 
-	gfx.draw_rounded_rect_filled(min.x, min.y, toolbar.area.max.x, toolbar.area.max.y, 3.9, gx.rgb(200, 200, 200))
+	gfx.draw_rounded_rect_filled(min.x, min.y, toolbar.area.max.x, toolbar.area.max.y, 3.9, gx.rgb(7, 7, 7))
 }
 
 fn (toolbar Toolbar) clip(posx f32, posy f32, gfx &gg.Context) {
