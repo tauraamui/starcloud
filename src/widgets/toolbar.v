@@ -36,6 +36,9 @@ pub fn Toolbar.new() Toolbar {
 		area: widgets.Span{ min: widgets.Pt{0, 8}, max: widgets.Pt{312.5, 38} }
 		buttons: [
 			Button{ area: Span{ min: Pt{ 0, 0 }, max: Pt{ x: 30, y: 28 } } }
+			Button{ area: Span{ min: Pt{ 0, 0 }, max: Pt{ x: 30, y: 28 } } }
+			Button{ area: Span{ min: Pt{ 0, 0 }, max: Pt{ x: 30, y: 28 } } }
+			Button{ area: Span{ min: Pt{ 0, 0 }, max: Pt{ x: 30, y: 28 } } }
 		]
 	}
 }
@@ -50,7 +53,7 @@ pub fn (mut toolbar Toolbar) draw(mut ops op.Stack, gfx &gg.Context) {
 	ops.push_offset(toolbar.area.min.x, toolbar.area.min.y)
 	defer { ops.pop_offset() }
 	for i, b in toolbar.buttons {
-		ops.push_offset((i*b.area.max.x)+5, (toolbar.area.max.y / 2) - (b.area.max.y / 2))
+		ops.push_offset((i*b.area.max.x)+(i*5), (toolbar.area.max.y / 2) - (b.area.max.y / 2))
 		b.draw(ops, gfx)
 		ops.pop_offset()
 	}
