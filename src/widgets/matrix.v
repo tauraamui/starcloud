@@ -23,16 +23,21 @@ mut:
 	selected_cells []Pt
 }
 
-struct Pt {
-mut:
+pub struct Pt {
+pub mut:
 	x f32
 	y f32
 }
 
-struct Span {
-mut:
+pub struct Span {
+pub mut:
 	min Pt
 	max Pt
+}
+
+fn (pt Pt) offset(ops op.Stack) Pt {
+	offx, offy := ops.offset(pt.x, pt.y)
+	return Pt{ x: offx, y: offy }
 }
 
 fn (span Span) normalise() Span {

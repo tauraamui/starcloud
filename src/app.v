@@ -19,22 +19,14 @@ mut:
 
 	ops op.Stack
 	canvas widgets.Canvas
-	matrix_x_pos f32
-	matrix_y_pos f32
-	is_dragging bool
-	is_selecting bool
-	selection_start_pos_x f32
-	selection_start_pos_y f32
-	selection_pending_pos_x f32
-	selection_pending_pos_y f32
+	toolbar widgets.Toolbar
 }
 
 fn main() {
 	mut app := &App{
 		gg: 0
 		canvas: widgets.Canvas.new()
-		matrix_x_pos: 20
-		matrix_y_pos: 20
+		toolbar: widgets.Toolbar{ area: widgets.Span{ min: widgets.Pt{0, 0}, max: widgets.Pt{50, 10} } }
 	}
 	app.gg = gg.new_context(
 		bg_color: gx.rgb(18, 18, 18)
@@ -53,7 +45,10 @@ fn frame(mut app &App) {
 	app.gg.begin()
 	app.gg.show_fps()
 	app.canvas.draw(mut app.ops, mut app.gg)
-	// app.toolbar.draw(mut app.ops, app.gg)
+	//win_size := app.gg.window_size()
+	// app.ops.push_offset((win_size.width / 2) - (app.toolbar.size.max.x), 0)
+	app.toolbar.draw(app.ops, app.gg)
+	//app.ops.pop_offset()
 	app.gg.end()
 }
 
