@@ -4,6 +4,11 @@ import op
 import gg
 import gx
 
+const (
+	mouse_pointer_icon_img = $embed_file('../icons/mouse-pointer.png')
+	mouse_pointer_outline_icon_img = $embed_file('../icons/mouse-pointer-outline.png')
+)
+
 pub struct Button {
 	area Span
 	is_pressed bool
