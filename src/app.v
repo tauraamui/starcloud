@@ -4,6 +4,7 @@ import op
 import gg
 import gx
 import widgets
+import assets
 
 const (
 	win_width  = 800
@@ -18,6 +19,7 @@ mut:
 	gg    &gg.Context = unsafe { nil }
 
 	ops op.Stack
+	assets assets.Assets
 	canvas widgets.Canvas
 	toolbar widgets.Toolbar
 }
@@ -26,7 +28,6 @@ fn main() {
 	mut app := &App{
 		gg: 0
 		canvas: widgets.Canvas.new()
-		toolbar: widgets.Toolbar.new()
 	}
 	app.gg = gg.new_context(
 		bg_color: gx.rgb(18, 18, 18)
@@ -38,6 +39,8 @@ fn main() {
 		event_fn: on_event
 		user_data: app
 	)
+	app.assets = assets.resolve_assets(mut app.gg)
+	app.toolbar = widgets.Toolbar.new(app.assets)
 	app.gg.run()
 }
 

@@ -3,13 +3,10 @@ module widgets
 import op
 import gg
 import gx
-
-const (
-	mouse_pointer_icon_img = $embed_file('../icons/mouse-pointer.png')
-	mouse_pointer_outline_icon_img = $embed_file('../icons/mouse-pointer-outline.png')
-)
+import assets
 
 pub struct Button {
+	assets assets.Assets
 	area Span
 	is_pressed bool
 	icon_char string
@@ -18,6 +15,7 @@ pub struct Button {
 pub fn (button Button) draw(ops op.Stack, gfx &gg.Context) {
 	min := button.area.min.offset(ops)
 	gfx.draw_rounded_rect_filled(min.x, min.y, button.area.max.x, button.area.max.y, 9, gx.rgb(172, 155, 238))
+	gfx.draw_image_by_id(min.x, min.y, 22, 22, button.assets.mouse_pointer_icon_id)
 }
 
 fn (button Button) clip(posx f32, posy f32, gfx &gg.Context) {
@@ -35,14 +33,14 @@ mut:
 	buttons []Button
 }
 
-pub fn Toolbar.new() Toolbar {
+pub fn Toolbar.new(ass assets.Assets) Toolbar {
 	return Toolbar{
 		area: widgets.Span{ min: widgets.Pt{0, 8}, max: widgets.Pt{312.5, 38} }
 		buttons: [
-			Button{ area: Span{ min: Pt{ 0, 0 }, max: Pt{ x: 30, y: 28 } } }
-			Button{ area: Span{ min: Pt{ 0, 0 }, max: Pt{ x: 30, y: 28 } } }
-			Button{ area: Span{ min: Pt{ 0, 0 }, max: Pt{ x: 30, y: 28 } } }
-			Button{ area: Span{ min: Pt{ 0, 0 }, max: Pt{ x: 30, y: 28 } } }
+			Button{ assets: ass, area: Span{ min: Pt{ 0, 0 }, max: Pt{ x: 30, y: 28 } } }
+			Button{ assets: ass, area: Span{ min: Pt{ 0, 0 }, max: Pt{ x: 30, y: 28 } } }
+			Button{ assets: ass, area: Span{ min: Pt{ 0, 0 }, max: Pt{ x: 30, y: 28 } } }
+			Button{ assets: ass, area: Span{ min: Pt{ 0, 0 }, max: Pt{ x: 30, y: 28 } } }
 		]
 	}
 }
