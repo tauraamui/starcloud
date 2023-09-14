@@ -5,6 +5,11 @@ import gg
 import gx
 import assets
 
+const (
+	mouse_pointer_icon_width = 17
+	mouse_pointer_icon_height = 17
+)
+
 pub struct Button {
 	assets assets.Assets
 	area Span
@@ -15,7 +20,31 @@ pub struct Button {
 pub fn (button Button) draw(ops op.Stack, gfx &gg.Context) {
 	min := button.area.min.offset(ops)
 	gfx.draw_rounded_rect_filled(min.x, min.y, button.area.max.x, button.area.max.y, 9, gx.rgb(172, 155, 238))
-	gfx.draw_image_by_id(min.x, min.y, 22, 22, button.assets.mouse_pointer_icon_id)
+
+	// NOTE:(tauraamui) -> not really sure what I am doing here,
+	//                     I think I am summing an alpha color shaded
+	//                     copy of the icon ontop of the black base, it's
+	//                     not perfect, will do for now
+	gfx.draw_image_with_config(gg.DrawImageConfig{
+		img_id: button.assets.mouse_pointer_icon_id,
+		img_rect: gg.Rect{
+			x: min.x + ((button.area.max.x / 2) - (mouse_pointer_icon_width / 1.6)),
+			y: min.y + ((button.area.max.y / 2) - (mouse_pointer_icon_height / 1.8)),
+			width: mouse_pointer_icon_width, height: mouse_pointer_icon_width
+		},
+		color: gx.rgb(255, 190, 190)
+		effect: .add
+	})
+	gfx.draw_image_with_config(gg.DrawImageConfig{
+		img_id: button.assets.mouse_pointer_icon_id,
+		img_rect: gg.Rect{
+			x: min.x + ((button.area.max.x / 2) - (mouse_pointer_icon_width / 1.6)),
+			y: min.y + ((button.area.max.y / 2) - (mouse_pointer_icon_height / 1.8)),
+			width: mouse_pointer_icon_width, height: mouse_pointer_icon_width
+		},
+		color: gx.rgba(255, 190, 190, 165)
+		effect: .alpha
+	})
 }
 
 fn (button Button) clip(posx f32, posy f32, gfx &gg.Context) {
@@ -37,9 +66,6 @@ pub fn Toolbar.new(ass assets.Assets) Toolbar {
 	return Toolbar{
 		area: widgets.Span{ min: widgets.Pt{0, 8}, max: widgets.Pt{312.5, 38} }
 		buttons: [
-			Button{ assets: ass, area: Span{ min: Pt{ 0, 0 }, max: Pt{ x: 30, y: 28 } } }
-			Button{ assets: ass, area: Span{ min: Pt{ 0, 0 }, max: Pt{ x: 30, y: 28 } } }
-			Button{ assets: ass, area: Span{ min: Pt{ 0, 0 }, max: Pt{ x: 30, y: 28 } } }
 			Button{ assets: ass, area: Span{ min: Pt{ 0, 0 }, max: Pt{ x: 30, y: 28 } } }
 		]
 	}
