@@ -4,6 +4,7 @@ import op
 import gg
 import gx
 import assets
+import sokol.sapp
 
 const (
 	mouse_pointer_icon_width = 17
@@ -13,8 +14,8 @@ const (
 pub struct Button {
 	assets assets.Assets
 	area Span
+mut:
 	is_pressed bool
-	icon_char string
 }
 
 pub fn (button Button) draw(ops op.Stack, gfx &gg.Context) {
@@ -47,14 +48,26 @@ pub fn (button Button) draw(ops op.Stack, gfx &gg.Context) {
 	})
 }
 
-fn (button Button) on_event(ops op.Stack, e &gg.Event) bool {
+fn (mut button Button) on_event(ops op.Stack, e &gg.Event) bool {
 	match e.typ {
 		.mouse_down {
 			if e.mouse_button == gg.MouseButton.left {
 				min := button.area.min.offset(ops)
 				if contains_point(min, button.area.max, Pt{ x: e.mouse_x / gg.dpi_scale(), y: e.mouse_y / gg.dpi_scale() }) {
-					println("button pressed")
+					sapp.set_mouse_cursor(sapp.MouseCursor.pointing_hand)
+					button.is_pressed = true
+					return true
 				}
+			}
+		}
+		.mouse_move {
+			if button.is_pressed { return true }
+		}
+		.mouse_up {
+			sapp.set_mouse_cursor(sapp.MouseCursor.default)
+			if button.is_pressed {
+				button.is_pressed = false
+				println("unpressed")
 			}
 		}
 		else {}
@@ -97,7 +110,7 @@ pub fn (mut toolbar Toolbar) draw(mut ops op.Stack, mut gfx &gg.Context) {
 	defer { ops.pop_offset() }
 	ops.push_offset(5, 5)
 	defer { ops.pop_offset() }
-	for i, b in toolbar.buttons {
+	for b in toolbar.buttons {
 		b.draw(ops, gfx)
 	}
 }
@@ -105,13 +118,16 @@ pub fn (mut toolbar Toolbar) draw(mut ops op.Stack, mut gfx &gg.Context) {
 pub fn(mut toolbar Toolbar) on_event(mut ops op.Stack, e &gg.Event) bool {
 	ops.push_offset(toolbar.area.min.x, toolbar.area.min.y)
 	ops.push_offset(5, 5)
+	mut captured := false
 	for i := toolbar.buttons.len-1; i >= 0; i-- {
-		mut b := toolbar.buttons[i]
-		captured := b.on_event(ops, e)
-		if captured { return true }
+		captured = toolbar.buttons[i].on_event(ops, e)
+		if captured {
+			break
+		}
 	}
 	ops.pop_offset()
 	ops.pop_offset()
+	if captured { return true }
 	match e.typ {
 		.mouse_down {
 			min := toolbar.area.min.offset(ops)
