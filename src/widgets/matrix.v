@@ -83,6 +83,7 @@ fn (matrix Matrix) draw(ops op.Stack, gfx &gg.Context) {
 	for _, cell in matrix.selected_cells {
 		x, y := cell.x, cell.y
 		// draw_rect_empty_with_thickness(gfx, posx + (x*cell_width)-1, posy + (y*cell_height)-1, cell_width+1, cell_height+1, 1, gx.rgb(255, 64, 188))
+		gfx.draw_rect_filled(posx + (x*cell_width), posy + (y*cell_height), cell_width, cell_height, gx.rgba(255, 64, 188, 25))
 		gfx.draw_rect_empty(posx + (x*cell_width), posy + (y*cell_height), cell_width, cell_height, gx.rgb(255, 64, 188))
 	}
 
