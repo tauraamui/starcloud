@@ -47,6 +47,21 @@ pub fn (button Button) draw(ops op.Stack, gfx &gg.Context) {
 	})
 }
 
+fn (button Button) on_event(ops op.Stack, e &gg.Event) bool {
+	match e.typ {
+		.mouse_down {
+			if e.mouse_button == gg.MouseButton.left {
+				min := button.area.min.offset(ops)
+				if contains_point(min, button.area.max, Pt{ x: e.mouse_x / gg.dpi_scale(), y: e.mouse_y / gg.dpi_scale() }) {
+					println("button pressed")
+				}
+			}
+		}
+		else {}
+	}
+	return false
+}
+
 fn (button Button) clip(posx f32, posy f32, gfx &gg.Context) {
 	gfx.scissor_rect(int(posx), int(posy), int(button.area.max.x), int(button.area.max.y))
 }
@@ -80,14 +95,21 @@ pub fn (mut toolbar Toolbar) draw(mut ops op.Stack, mut gfx &gg.Context) {
 
 	ops.push_offset(toolbar.area.min.x, toolbar.area.min.y)
 	defer { ops.pop_offset() }
+	ops.push_offset(5, 5)
+	defer { ops.pop_offset() }
 	for i, b in toolbar.buttons {
-		ops.push_offset((i*b.area.max.x)+((i+1)*5), (toolbar.area.max.y / 2) - (b.area.max.y / 2))
 		b.draw(ops, gfx)
-		ops.pop_offset()
 	}
 }
 
-pub fn(mut toolbar Toolbar) on_event(ops op.Stack, e &gg.Event) bool {
+pub fn(mut toolbar Toolbar) on_event(mut ops op.Stack, e &gg.Event) bool {
+	ops.push_offset(5, 5)
+	for i := toolbar.buttons.len-1; i >= 0; i-- {
+		mut b := toolbar.buttons[i]
+		captured := b.on_event(ops, e)
+		if captured { return true }
+	}
+	ops.pop_offset()
 	match e.typ {
 		.mouse_down {
 			min := toolbar.area.min.offset(ops)
