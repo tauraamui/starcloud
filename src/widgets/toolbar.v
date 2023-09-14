@@ -103,12 +103,14 @@ pub fn (mut toolbar Toolbar) draw(mut ops op.Stack, mut gfx &gg.Context) {
 }
 
 pub fn(mut toolbar Toolbar) on_event(mut ops op.Stack, e &gg.Event) bool {
+	ops.push_offset(toolbar.area.min.x, toolbar.area.min.y)
 	ops.push_offset(5, 5)
 	for i := toolbar.buttons.len-1; i >= 0; i-- {
 		mut b := toolbar.buttons[i]
 		captured := b.on_event(ops, e)
 		if captured { return true }
 	}
+	ops.pop_offset()
 	ops.pop_offset()
 	match e.typ {
 		.mouse_down {
