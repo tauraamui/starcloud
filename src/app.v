@@ -30,7 +30,7 @@ fn main() {
 		canvas: widgets.Canvas.new()
 	}
 	app.gg = gg.new_context(
-		bg_color: gx.rgb(18, 18, 18)
+		bg_color: gx.rgb(30, 30, 30)
 		width: win_width
 		height: win_height
 		create_window: true
