@@ -16,6 +16,7 @@ pub struct Button {
 	area Span
 mut:
 	is_pressed bool
+	is_hovered_over bool
 }
 
 pub fn (button Button) draw(ops op.Stack, gfx &gg.Context, active bool) {
@@ -63,6 +64,16 @@ fn (mut button Button) on_event(ops op.Stack, e &gg.Event, id int, update_active
 		}
 		.mouse_move {
 			if button.is_pressed { return true }
+			if contains_point(min, button.area.max, Pt{ x: e.mouse_x / gg.dpi_scale(), y: e.mouse_y / gg.dpi_scale() }) {
+				button.is_hovered_over = true
+				if !active { sapp.set_mouse_cursor(sapp.MouseCursor.pointing_hand) }
+				return false
+			}
+
+			if button.is_hovered_over {
+				button.is_hovered_over = false
+				sapp.set_mouse_cursor(sapp.MouseCursor.default)
+			}
 		}
 		.mouse_up {
 			sapp.set_mouse_cursor(sapp.MouseCursor.default)
