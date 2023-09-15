@@ -21,7 +21,7 @@ mut:
 
 pub fn (button Button) draw(ops op.Stack, gfx &gg.Context, active bool) {
 	min := button.area.min.offset(ops)
-	gfx.draw_rounded_rect_filled(min.x, min.y, button.area.max.x, button.area.max.y, 9, if active { gx.rgb(172, 155, 238) } else { gx.rgba(172, 155, 238, 80) } )
+	gfx.draw_rounded_rect_filled(min.x, min.y, button.area.max.x, button.area.max.y, 9, if active { gx.rgb(172, 155, 238) } else { gx.rgba(172, 155, 238, 110) } )
 	button.icon.draw(ops, gfx, min, button.area.max, active)
 }
 
@@ -38,6 +38,17 @@ fn (icon Icon) draw(ops op.Stack, gfx &gg.Context, min Pt, max Pt, active bool) 
 	//                     copy of the icon ontop of the black base, it's
 	//                     not perfect, will do for now
 	icon_id := if active { icon.active_id } else { icon.inactive_id }
+	if !active {
+		gfx.draw_image_with_config(gg.DrawImageConfig{
+			img_id: icon_id,
+			img_rect: gg.Rect{
+				x: min.x + ((max.x / 2) - (icon.width / 1.6)),
+				y: min.y + ((max.y / 2) - (icon.height / 1.8)),
+				width: icon.width, height: icon.height
+			},
+			color: gx.rgb(255, 190, 190)
+		})
+	}
 	gfx.draw_image_with_config(gg.DrawImageConfig{
 		img_id: icon_id,
 		img_rect: gg.Rect{
@@ -123,14 +134,14 @@ pub fn Toolbar.new(ass assets.Assets) Toolbar {
 			Button{
 				area: Span{ min: Pt{ 0, 0 }, max: Pt{ x: 30, y: 28 } },
 				icon: Icon{
-					active_id: ass.mouse_pointer_icon_id, inactive_id: ass.mouse_pointer_icon_id,
+					active_id: ass.mouse_pointer_icon_id, inactive_id: ass.mouse_pointer_outline_icon_id,
 					width: mouse_pointer_icon_width, height: mouse_pointer_icon_height
 				}
 			}
 			Button{
 				area: Span{ min: Pt{ 0, 0 }, max: Pt{ x: 30, y: 28 } },
 				icon: Icon{
-					active_id: ass.mouse_pointer_icon_id, inactive_id: ass.mouse_pointer_icon_id,
+					active_id: ass.mouse_pointer_icon_id, inactive_id: ass.mouse_pointer_outline_icon_id,
 					width: mouse_pointer_icon_width, height: mouse_pointer_icon_height
 				}
 			}
