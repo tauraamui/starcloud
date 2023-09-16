@@ -201,7 +201,9 @@ fn (mut matrix Matrix) on_event(ops op.Stack, e &gg.Event, scale f32) bool {
 			if time.since(matrix.tracked_time).milliseconds() <= 200 {
 				matrix.fast_click_count += 1
 				if matrix.fast_click_count >= 2 {
-					println("double clicked")
+					posx, posy := ops.offset(matrix.position_x, matrix.position_y)
+					position_within_matrix := widgets.Pt{x: e.mouse_x - posx, y: e.mouse_y - posy }
+					println("double clicked @ ${position_within_matrix}")
 					matrix.fast_click_count = 0
 				}
 			}
