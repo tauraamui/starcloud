@@ -35,7 +35,7 @@ pub fn (mut canvas Canvas) draw(mut ops op.Stack, mut gfx &gg.Context) {
 	}
 	ops.push_offset(canvas.world_offset_x, canvas.world_offset_y)
 	defer { ops.pop_offset() }
-	for _, m in canvas.matrices {
+	for _, mut m in canvas.matrices {
 		m.draw(ops, gfx)
 	}
 }

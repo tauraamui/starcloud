@@ -4,6 +4,7 @@ import gg
 import gx
 import op
 import sokol.sapp
+import time
 
 const (
 	cell_width = 80
@@ -21,6 +22,10 @@ mut:
 	selection_area Span
 
 	selected_cells []Pt
+
+	tracked_time time.Time
+	fast_click_count u8
+	double_clicked bool
 }
 
 pub struct Pt {
@@ -69,7 +74,14 @@ struct Cell {
 	y int
 }
 
-fn (matrix Matrix) draw(ops op.Stack, gfx &gg.Context) {
+fn (mut matrix Matrix) draw(ops op.Stack, gfx &gg.Context) {
+	/*
+	if matrix.fast_click_count >= 2 {
+		matrix.double_clicked = true
+		println("double clicked")
+		matrix.fast_click_count = 0
+	}
+	*/
 	posx, posy := ops.offset(matrix.position_x, matrix.position_y)
 	matrix.clip(posx, posy, gfx) // TODO:(tauraamui) -> expand clip by 1 px to allow for elapsed cell border draws
 	defer { matrix.noclip(gfx) }
@@ -153,6 +165,7 @@ fn (mut matrix Matrix) on_event(ops op.Stack, e &gg.Event, scale f32) bool {
 					return true
 				}
 				.left {
+					matrix.tracked_time = time.now()
 					sapp.set_mouse_cursor(sapp.MouseCursor.crosshair)
 					matrix.is_selecting = true
 					matrix.is_dragging = false
@@ -185,6 +198,13 @@ fn (mut matrix Matrix) on_event(ops op.Stack, e &gg.Event, scale f32) bool {
 			}
 		}
 		.mouse_up {
+			if time.since(matrix.tracked_time).milliseconds() <= 200 {
+				matrix.fast_click_count += 1
+				if matrix.fast_click_count >= 2 {
+					println("double clicked")
+					matrix.fast_click_count = 0
+				}
+			}
 			sapp.set_mouse_cursor(sapp.MouseCursor.default)
 			matrix.is_dragging = false
 			if matrix.is_selecting {
@@ -236,7 +256,7 @@ fn overlaps(r gg.Rect, s gg.Rect) bool {
 	/*
 	nr := normalise_bounds(r)
 	ns := normalise_bounds(s)
-	return 
+	return
 		r.x < s.x+s.width && s.x < r.x+r.width &&
 		r.y < s.y+s.height && s.y < r.y+r.height
 		r.x < s.x+s.width && s.x < r.x+r.width &&
