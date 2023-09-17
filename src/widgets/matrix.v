@@ -153,24 +153,7 @@ fn (mut matrix Matrix) on_event(ops op.Stack, e &gg.Event, scale f32) bool {
 			return matrix.handle_mouse_move_event(ops, e, scale)
 		}
 		.mouse_up {
-			// double clicked ?
-			if time.since(matrix.tracked_time).milliseconds() <= 200 {
-				matrix.is_selecting = false
-				matrix.fast_click_count += 1
-				if matrix.fast_click_count >= 2 {
-					posx, posy := ops.offset(matrix.position_x, matrix.position_y)
-					position_within_matrix := widgets.Pt{x: e.mouse_x - posx, y: e.mouse_y - posy }
-					matrix.selected_cells = []
-					matrix.cell_in_edit_mode = widgets.Pt{ x: f32(math.floor(position_within_matrix.x / f32(cell_width))), y: f32(math.floor(position_within_matrix.y / f32(cell_height))) }
-					matrix.fast_click_count = 0
-				}
-			}
-			sapp.set_mouse_cursor(sapp.MouseCursor.default)
-			matrix.is_dragging = false
-			if matrix.is_selecting {
-				matrix.is_selecting = false
-				matrix.resolve_selected_cells(ops)
-			}
+			return matrix.handle_mouse_up_event(ops, e, scale)
 		}
 		else {}
 	}
@@ -218,6 +201,28 @@ fn (mut matrix Matrix) handle_mouse_move_event(ops op.Stack, e &gg.Event, scale 
 		matrix.selection_area.max.x += (e.mouse_dx / scale)
 		matrix.selection_area.max.y += (e.mouse_dy / scale)
 		return true
+	}
+	return false
+}
+
+fn (mut matrix Matrix) handle_mouse_up_event(ops op.Stack, e &gg.Event, scale f32) bool {
+	// double clicked ?
+	if time.since(matrix.tracked_time).milliseconds() <= 200 {
+		matrix.is_selecting = false
+		matrix.fast_click_count += 1
+		if matrix.fast_click_count >= 2 {
+			posx, posy := ops.offset(matrix.position_x, matrix.position_y)
+			position_within_matrix := widgets.Pt{x: e.mouse_x - posx, y: e.mouse_y - posy }
+			matrix.selected_cells = []
+			matrix.cell_in_edit_mode = widgets.Pt{ x: f32(math.floor(position_within_matrix.x / f32(cell_width))), y: f32(math.floor(position_within_matrix.y / f32(cell_height))) }
+			matrix.fast_click_count = 0
+		}
+	}
+	sapp.set_mouse_cursor(sapp.MouseCursor.default)
+	matrix.is_dragging = false
+	if matrix.is_selecting {
+		matrix.is_selecting = false
+		matrix.resolve_selected_cells(ops)
 	}
 	return false
 }
