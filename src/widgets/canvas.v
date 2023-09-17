@@ -22,8 +22,8 @@ pub fn Canvas.new() Canvas {
 		world_offset_x: 20
 		world_offset_y: 0
 		matrices: [
-			Matrix{ position_x: 10, position_y: 10, cols: 2, rows: 4 }
-			Matrix{ position_x: 10, position_y: 180, cols: 15, rows: 60 }
+			Matrix{ position_x: 10, position_y: 10, cols: 2, rows: 4, cell_in_edit_mode: widgets.Pt{ x: -1, y: -1 } }
+			Matrix{ position_x: 10, position_y: 180, cols: 15, rows: 60, cell_in_edit_mode: widgets.Pt{ x: -1, y: -1 }  }
 		]
 	}
 }

@@ -21,12 +21,11 @@ mut:
 	is_dragging bool
 	is_selecting bool
 	selection_area Span
-
 	selected_cells []Pt
-
 	tracked_time time.Time
 	fast_click_count u8
 	double_clicked bool
+	cell_in_edit_mode Pt
 }
 
 pub struct Pt {
@@ -76,18 +75,12 @@ struct Cell {
 }
 
 fn (mut matrix Matrix) draw(ops op.Stack, gfx &gg.Context) {
-	/*
-	if matrix.fast_click_count >= 2 {
-		matrix.double_clicked = true
-		println("double clicked")
-		matrix.fast_click_count = 0
-	}
-	*/
 	posx, posy := ops.offset(matrix.position_x, matrix.position_y)
 	matrix.clip(posx, posy, gfx) // TODO:(tauraamui) -> expand clip by 1 px to allow for elapsed cell border draws
 	defer { matrix.noclip(gfx) }
 	for x in 0..matrix.cols {
 		for y in 0..matrix.rows {
+			if matrix.cell_in_edit_mode.x == x && matrix.cell_in_edit_mode.y == y { continue }
 			gfx.draw_rect_filled(posx + (x*cell_width), posy + (y*cell_height), cell_width, cell_height, gx.rgb(245, 245, 245))
 			gfx.draw_rect_empty(posx + (x*cell_width), posy + (y*cell_height), cell_width, cell_height, gx.rgb(115, 115, 115))
 		}
@@ -118,24 +111,6 @@ fn draw_rect_empty_with_thickness(gfx &gg.Context, x f32, y f32, w f32, h f32, t
 	gfx.draw_line_with_config(x+w, y+h, x, y+h, cfg)
 	gfx.draw_line_with_config(x, y+h, x, y, cfg)
 }
-
-
-/*
-draw_rect_empty(x f32, y f32, w f32, h f32, c gx.Color) {
-	if c.a != 255 {
-		sgl.load_pipeline(ctx.pipeline.alpha)
-	}
-	sgl.c4b(c.r, c.g, c.b, c.a)
-
-	sgl.begin_line_strip()
-	sgl.v2f(x * ctx.scale, y * ctx.scale)
-	sgl.v2f((x + w) * ctx.scale, y * ctx.scale)
-	sgl.v2f((x + w) * ctx.scale, (y + h) * ctx.scale)
-	sgl.v2f(x * ctx.scale, (y + h) * ctx.scale)
-	sgl.v2f(x * ctx.scale, (y - 1) * ctx.scale)
-	sgl.end()
-}
-*/
 
 fn (mut matrix Matrix) resolve_selected_cells(ops op.Stack) {
 	selection_area := matrix.selection_area.normalise()
@@ -198,6 +173,7 @@ fn (mut matrix Matrix) on_event(ops op.Stack, e &gg.Event, scale f32) bool {
 			}
 		}
 		.mouse_up {
+			// double clicked ?
 			if time.since(matrix.tracked_time).milliseconds() <= 200 {
 				matrix.is_selecting = false
 				matrix.fast_click_count += 1
@@ -205,7 +181,7 @@ fn (mut matrix Matrix) on_event(ops op.Stack, e &gg.Event, scale f32) bool {
 					posx, posy := ops.offset(matrix.position_x, matrix.position_y)
 					position_within_matrix := widgets.Pt{x: e.mouse_x - posx, y: e.mouse_y - posy }
 					matrix.selected_cells = []
-					matrix.selected_cells << widgets.Pt{ x: f32(math.floor(position_within_matrix.x / f32(cell_width))), y: f32(math.floor(position_within_matrix.y / f32(cell_height))) }
+					matrix.cell_in_edit_mode = widgets.Pt{ x: f32(math.floor(position_within_matrix.x / f32(cell_width))), y: f32(math.floor(position_within_matrix.y / f32(cell_height))) }
 					matrix.fast_click_count = 0
 				}
 			}
@@ -219,53 +195,6 @@ fn (mut matrix Matrix) on_event(ops op.Stack, e &gg.Event, scale f32) bool {
 		else {}
 	}
 	return false
-}
-
-/*
-type Rectangle struct {
-	Min, Max f32.Point
-}
-
-func (r *Rectangle) SwappedBounds() Rectangle {
-	min, max := r.Min, r.Max
-	if max.X < min.X {
-		max.X = r.Min.X
-		min.X = r.Max.X
-	}
-	if max.Y < min.Y {
-		max.Y = r.Min.Y
-		min.Y = r.Max.Y
-	}
-	return Rectangle{Min: min, Max: max}
-}
-
-func (r *Rectangle) Empty() bool {
-	return r.Min.X >= r.Max.X || r.Min.Y >= r.Max.Y
-}
-
-// Overlaps reports whether r and s have a non-empty intersection.
-func (r *Rectangle) Overlaps(s Rectangle) bool {
-	return !r.Empty() && !s.Empty() &&
-		r.Min.X < s.Max.X && s.Min.X < r.Max.X &&
-		r.Min.Y < s.Max.Y && s.Min.Y < r.Max.Y
-}
-
-func (r *Rectangle) ConvertToPixelspace(dp func(v unit.Dp) int) image.Rectangle {
-	return image.Rect(dp(unit.Dp(r.Min.X)), dp(unit.Dp(r.Min.Y)), dp(unit.Dp(r.Max.X)), dp(unit.Dp(r.Max.Y)))
-}
-*/
-
-fn overlaps(r gg.Rect, s gg.Rect) bool {
-	return false
-	/*
-	nr := normalise_bounds(r)
-	ns := normalise_bounds(s)
-	return
-		r.x < s.x+s.width && s.x < r.x+r.width &&
-		r.y < s.y+s.height && s.y < r.y+r.height
-		r.x < s.x+s.width && s.x < r.x+r.width &&
-		r.y < s.height && s.y < r.height
-	*/
 }
 
 fn (matrix Matrix) contains_point(ops op.Stack, pt_x f32, pt_y f32) bool {
