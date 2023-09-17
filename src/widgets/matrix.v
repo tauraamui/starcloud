@@ -147,45 +147,10 @@ fn (mut matrix Matrix) on_event(ops op.Stack, e &gg.Event, scale f32) bool {
 	match e.typ {
 		.mouse_down {
 			if !matrix.contains_point(ops, e.mouse_x / scale, e.mouse_y / scale) { return false }
-			match e.mouse_button {
-				.right {
-					sapp.set_mouse_cursor(sapp.MouseCursor.resize_all)
-					matrix.is_selecting = false
-					matrix.is_dragging = true
-					return true
-				}
-				.left {
-					matrix.tracked_time = time.now()
-					sapp.set_mouse_cursor(sapp.MouseCursor.crosshair)
-					matrix.is_selecting = true
-					matrix.is_dragging = false
-					matrix.selection_area = Span{
-						min: Pt{
-							x: e.mouse_x / scale,
-							y: e.mouse_y / scale
-						},
-						max: Pt{
-							x: e.mouse_x / scale,
-							y: e.mouse_y / scale
-						}
-					}
-					return true
-				}
-				else {}
-			}
+			return matrix.handle_mouse_down_event(ops, e, scale)
 		}
 		.mouse_move {
-			if matrix.is_dragging {
-				matrix.position_x += (e.mouse_dx / scale)
-				matrix.position_y += (e.mouse_dy / scale)
-				return true
-			}
-
-			if matrix.is_selecting {
-				matrix.selection_area.max.x += (e.mouse_dx / scale)
-				matrix.selection_area.max.y += (e.mouse_dy / scale)
-				return true
-			}
+			return matrix.handle_mouse_move_event(ops, e, scale)
 		}
 		.mouse_up {
 			// double clicked ?
@@ -208,6 +173,51 @@ fn (mut matrix Matrix) on_event(ops op.Stack, e &gg.Event, scale f32) bool {
 			}
 		}
 		else {}
+	}
+	return false
+}
+
+fn (mut matrix Matrix) handle_mouse_down_event(ops op.Stack, e &gg.Event, scale f32) bool {
+	match e.mouse_button {
+		.right {
+			sapp.set_mouse_cursor(sapp.MouseCursor.resize_all)
+			matrix.is_selecting = false
+			matrix.is_dragging = true
+			return true
+		}
+		.left {
+			matrix.tracked_time = time.now()
+			sapp.set_mouse_cursor(sapp.MouseCursor.crosshair)
+			matrix.is_selecting = true
+			matrix.is_dragging = false
+			matrix.selection_area = Span{
+				min: Pt{
+					x: e.mouse_x / scale,
+					y: e.mouse_y / scale
+				},
+				max: Pt{
+					x: e.mouse_x / scale,
+					y: e.mouse_y / scale
+				}
+			}
+			return true
+		}
+		else {}
+	}
+	return false
+}
+
+fn (mut matrix Matrix) handle_mouse_move_event(ops op.Stack, e &gg.Event, scale f32) bool {
+	if matrix.is_dragging {
+		matrix.position_x += (e.mouse_dx / scale)
+		matrix.position_y += (e.mouse_dy / scale)
+		return true
+	}
+
+	if matrix.is_selecting {
+		matrix.selection_area.max.x += (e.mouse_dx / scale)
+		matrix.selection_area.max.y += (e.mouse_dy / scale)
+		return true
 	}
 	return false
 }
