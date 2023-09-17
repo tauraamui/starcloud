@@ -74,7 +74,7 @@ struct Cell {
 	y int
 }
 
-fn (mut matrix Matrix) draw(ops op.Stack, gfx &gg.Context) {
+fn (mut matrix Matrix) draw(mut ops op.Stack, gfx &gg.Context) {
 	posx, posy := ops.offset(matrix.position_x, matrix.position_y)
 	matrix.clip(posx, posy, gfx) // TODO:(tauraamui) -> expand clip by 1 px to allow for elapsed cell border draws
 	defer { matrix.noclip(gfx) }
@@ -92,12 +92,27 @@ fn (mut matrix Matrix) draw(ops op.Stack, gfx &gg.Context) {
 		gfx.draw_rect_empty(posx + (x*cell_width), posy + (y*cell_height), cell_width, cell_height, gx.rgb(255, 64, 188))
 	}
 
+	if matrix.cell_in_edit_mode.x > -1 && matrix.cell_in_edit_mode.y > -1 {
+		x, y := matrix.cell_in_edit_mode.x, matrix.cell_in_edit_mode.y
+		gfx.draw_rect_filled(posx + (x*cell_width), posy + (y*cell_height), cell_width, cell_height, gx.rgb(235, 235, 235))
+		gfx.draw_rect_empty(posx + (x*cell_width), posy + (y*cell_height), cell_width, cell_height, gx.rgb(115, 115, 115))
+		mut new_ops := op.Stack{}
+		new_ops.push_offset(posx+(x*cell_width), posy+(y*cell_height))
+		draw_editable_cell(new_ops, gfx)
+		new_ops.pop_offset()
+	}
+
 	if matrix.is_selecting {
 		selection_area := matrix.selection_area.normalise()
 		if !selection_area.empty() {
 			gfx.draw_rect_filled(selection_area.min.x, selection_area.min.y, selection_area.max.x-selection_area.min.x, selection_area.max.y-selection_area.min.y, gx.rgba(224, 63, 222, 80))
 		}
 	}
+}
+
+fn draw_editable_cell(ops op.Stack, gfx &gg.Context) {
+	posx, posy := ops.offset(3, 1)
+	gfx.draw_line(posx, posy, posx, posy+cell_height-3, gx.black)
 }
 
 fn draw_rect_empty_with_thickness(gfx &gg.Context, x f32, y f32, w f32, h f32, t int, c gx.Color) {
