@@ -5,6 +5,7 @@ import gx
 import op
 import sokol.sapp
 import time
+import math
 
 const (
 	cell_width = 80
@@ -94,7 +95,6 @@ fn (mut matrix Matrix) draw(ops op.Stack, gfx &gg.Context) {
 
 	for _, cell in matrix.selected_cells {
 		x, y := cell.x, cell.y
-		// draw_rect_empty_with_thickness(gfx, posx + (x*cell_width)-1, posy + (y*cell_height)-1, cell_width+1, cell_height+1, 1, gx.rgb(255, 64, 188))
 		gfx.draw_rect_filled(posx + (x*cell_width), posy + (y*cell_height), cell_width, cell_height, gx.rgba(255, 64, 188, 25))
 		gfx.draw_rect_empty(posx + (x*cell_width), posy + (y*cell_height), cell_width, cell_height, gx.rgb(255, 64, 188))
 	}
@@ -199,11 +199,13 @@ fn (mut matrix Matrix) on_event(ops op.Stack, e &gg.Event, scale f32) bool {
 		}
 		.mouse_up {
 			if time.since(matrix.tracked_time).milliseconds() <= 200 {
+				matrix.is_selecting = false
 				matrix.fast_click_count += 1
 				if matrix.fast_click_count >= 2 {
 					posx, posy := ops.offset(matrix.position_x, matrix.position_y)
 					position_within_matrix := widgets.Pt{x: e.mouse_x - posx, y: e.mouse_y - posy }
-					println("double clicked @ ${position_within_matrix}")
+					matrix.selected_cells = []
+					matrix.selected_cells << widgets.Pt{ x: f32(math.floor(position_within_matrix.x / f32(cell_width))), y: f32(math.floor(position_within_matrix.y / f32(cell_height))) }
 					matrix.fast_click_count = 0
 				}
 			}
