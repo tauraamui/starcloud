@@ -5,7 +5,6 @@ import gx
 import op
 import sokol.sapp
 import time
-import math
 
 const (
 	cell_width = 80
@@ -18,11 +17,12 @@ struct Matrix {
 mut:
 	position_x f32
 	position_y f32
-	is_dragging bool
+	time_left_pressed time.Time
+	left_down bool
+	right_down bool
 	is_selecting bool
 	selection_area Span
 	selected_cells []Pt
-	tracked_time time.Time
 	fast_click_count u8
 	double_clicked bool
 	cell_in_edit_mode Pt
@@ -75,6 +75,11 @@ struct Cell {
 }
 
 fn (mut matrix Matrix) draw(mut ops op.Stack, gfx &gg.Context) {
+	if matrix.left_down {
+		if time.since(matrix.time_left_pressed).milliseconds() >= 100 {
+			sapp.set_mouse_cursor(sapp.MouseCursor.crosshair)
+		}
+	}
 	posx, posy := ops.offset(matrix.position_x, matrix.position_y)
 	matrix.clip(posx, posy, gfx) // TODO:(tauraamui) -> expand clip by 1 px to allow for elapsed cell border draws
 	defer { matrix.noclip(gfx) }
@@ -164,11 +169,26 @@ fn (mut matrix Matrix) handle_mouse_down_event(ops op.Stack, e &gg.Event, scale 
 	match e.mouse_button {
 		.right {
 			sapp.set_mouse_cursor(sapp.MouseCursor.resize_all)
-			matrix.is_selecting = false
-			matrix.is_dragging = true
+			matrix.right_down = true
+			matrix.left_down = false
 			return true
 		}
 		.left {
+			matrix.time_left_pressed = time.now()
+			matrix.left_down = true
+			matrix.right_down = false
+			matrix.selection_area = Span{
+				min: Pt{
+					x: e.mouse_x / scale,
+					y: e.mouse_y / scale
+				},
+				max: Pt{
+					x: e.mouse_x / scale,
+					y: e.mouse_y / scale
+				}
+			}
+			return true
+			/*
 			matrix.tracked_time = time.now()
 			sapp.set_mouse_cursor(sapp.MouseCursor.crosshair)
 			matrix.is_selecting = true
@@ -184,6 +204,7 @@ fn (mut matrix Matrix) handle_mouse_down_event(ops op.Stack, e &gg.Event, scale 
 				}
 			}
 			return true
+			*/
 		}
 		else {}
 	}
@@ -191,21 +212,37 @@ fn (mut matrix Matrix) handle_mouse_down_event(ops op.Stack, e &gg.Event, scale 
 }
 
 fn (mut matrix Matrix) handle_mouse_move_event(ops op.Stack, e &gg.Event, scale f32) bool {
-	if matrix.is_dragging {
+	if matrix.right_down {
 		matrix.position_x += (e.mouse_dx / scale)
 		matrix.position_y += (e.mouse_dy / scale)
 		return true
 	}
 
-	if matrix.is_selecting {
+	if matrix.left_down {
+		matrix.is_selecting = true
 		matrix.selection_area.max.x += (e.mouse_dx / scale)
 		matrix.selection_area.max.y += (e.mouse_dy / scale)
 		return true
 	}
+
 	return false
 }
 
 fn (mut matrix Matrix) handle_mouse_up_event(ops op.Stack, e &gg.Event, scale f32) bool {
+	if matrix.left_down {
+		sapp.set_mouse_cursor(sapp.MouseCursor.default)
+		matrix.left_down = false
+		matrix.is_selecting = false
+		matrix.resolve_selected_cells(ops)
+		matrix.selection_area = Span{ min: Pt{ -1, -1}, max: Pt{ -1, -1 } }
+	}
+
+	if matrix.right_down {
+		matrix.right_down = false
+		sapp.set_mouse_cursor(sapp.MouseCursor.default)
+	}
+	return false
+	/*
 	// double clicked ?
 	if time.since(matrix.tracked_time).milliseconds() <= 200 {
 		matrix.is_selecting = false
@@ -225,6 +262,7 @@ fn (mut matrix Matrix) handle_mouse_up_event(ops op.Stack, e &gg.Event, scale f3
 		matrix.resolve_selected_cells(ops)
 	}
 	return false
+	*/
 }
 
 fn (matrix Matrix) contains_point(ops op.Stack, pt_x f32, pt_y f32) bool {
