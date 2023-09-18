@@ -80,6 +80,9 @@ pub fn (mut canvas Canvas) on_event(e &gg.Event, mut ops op.Stack) {
 pub fn (mut canvas Canvas) on_char(c u32) {
 	buf := [5]u8{}
 	s := unsafe { utf32_to_str_no_malloc(c, &buf[0]) }
-	println("CHAR: ${s}")
+
+	for i := canvas.matrices.len-1; i >= 0; i-- {
+		canvas.matrices[i].on_char(s)
+	}
 }
 

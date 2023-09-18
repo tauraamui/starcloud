@@ -247,6 +247,12 @@ fn (mut matrix Matrix) handle_mouse_up_event(ops op.Stack, e &gg.Event, scale f3
 	return false
 }
 
+fn (matrix Matrix) on_char(c string) {
+	if matrix.cell_in_edit_mode.x != -1 && matrix.cell_in_edit_mode.y != -1 {
+		println("CHAR: ${c}")
+	}
+}
+
 fn (matrix Matrix) contains_point(ops op.Stack, pt_x f32, pt_y f32) bool {
 	area := matrix.area(ops)
 	if pt_x > area.x && pt_x < area.x + area.width && pt_y > area.y && pt_y < area.y + area.height { return true }
