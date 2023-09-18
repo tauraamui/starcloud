@@ -76,3 +76,7 @@ pub fn (mut canvas Canvas) on_event(e &gg.Event, mut ops op.Stack) {
 	}
 }
 
+pub fn (mut canvas Canvas) on_char(c u32) {
+	println("CHAR: ${c}")
+}
+

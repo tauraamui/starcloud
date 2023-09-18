@@ -37,6 +37,7 @@ fn main() {
 		window_title: 'starcloud'
 		frame_fn: frame
 		event_fn: on_event
+		char_fn: on_char
 		user_data: app
 	)
 	app.assets = assets.resolve_assets(mut app.gg)
@@ -62,5 +63,9 @@ fn on_event(e &gg.Event, mut app &App) {
 	app.ops.pop_offset()
 	if captured { return }
 	app.canvas.on_event(e, mut app.ops)
+}
+
+fn on_char(c u32, mut app &App) {
+	app.canvas.on_char(c)
 }
 
