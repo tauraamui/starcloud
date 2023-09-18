@@ -76,7 +76,10 @@ pub fn (mut canvas Canvas) on_event(e &gg.Event, mut ops op.Stack) {
 	}
 }
 
+[manualfree]
 pub fn (mut canvas Canvas) on_char(c u32) {
-	println("CHAR: ${c}")
+	buf := [5]u8{}
+	s := unsafe { utf32_to_str_no_malloc(c, &buf[0]) }
+	println("CHAR: ${s}")
 }
 
