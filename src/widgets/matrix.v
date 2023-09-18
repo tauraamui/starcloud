@@ -183,14 +183,15 @@ fn (mut matrix Matrix) handle_mouse_down_event(ops op.Stack, e &gg.Event, scale 
 				matrix.selected_cells = []
 				matrix.cell_in_edit_mode = widgets.Pt{ x: f32(math.floor(position_within_matrix.x / f32(cell_width))), y: f32(math.floor(position_within_matrix.y / f32(cell_height))) }
 				return true
-			} else {
-				posx, posy := ops.offset(matrix.position_x, matrix.position_y)
-				position_within_matrix := widgets.Pt{x: e.mouse_x - posx, y: e.mouse_y - posy }
-				pressed_cell := widgets.Pt{ x: f32(math.floor(position_within_matrix.x / f32(cell_width))), y: f32(math.floor(position_within_matrix.y / f32(cell_height))) }
-				if pressed_cell.x != matrix.cell_in_edit_mode.x && pressed_cell.y != matrix.cell_in_edit_mode.y {
-					matrix.cell_in_edit_mode = widgets.Pt{ x: -1, y: -1 }
-				}
 			}
+
+			posx, posy := ops.offset(matrix.position_x, matrix.position_y)
+			position_within_matrix := widgets.Pt{x: e.mouse_x - posx, y: e.mouse_y - posy }
+			pressed_cell := widgets.Pt{ x: f32(math.floor(position_within_matrix.x / f32(cell_width))), y: f32(math.floor(position_within_matrix.y / f32(cell_height))) }
+			if pressed_cell.x != matrix.cell_in_edit_mode.x && pressed_cell.y != matrix.cell_in_edit_mode.y {
+				matrix.cell_in_edit_mode = widgets.Pt{ x: -1, y: -1 }
+			}
+
 			matrix.time_left_pressed = time.now()
 			matrix.left_down = true
 			matrix.right_down = false
