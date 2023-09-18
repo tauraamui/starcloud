@@ -6,6 +6,7 @@ import op
 import sokol.sapp
 import time
 import math
+import data
 
 const (
 	cell_width = 80
@@ -16,6 +17,7 @@ struct Matrix {
 	cols int
 	rows int
 mut:
+	mdata data.Matrix
 	position_x f32
 	position_y f32
 	time_left_pressed time.Time
@@ -85,8 +87,8 @@ fn (mut matrix Matrix) draw(mut ops op.Stack, gfx &gg.Context) {
 	posx, posy := ops.offset(matrix.position_x, matrix.position_y)
 	matrix.clip(posx, posy, gfx) // TODO:(tauraamui) -> expand clip by 1 px to allow for elapsed cell border draws
 	defer { matrix.noclip(gfx) }
-	for x in 0..matrix.cols {
-		for y in 0..matrix.rows {
+	for x in 0..matrix.mdata.width {
+		for y in 0..matrix.mdata.height {
 			if matrix.cell_in_edit_mode.x == x && matrix.cell_in_edit_mode.y == y { continue }
 			gfx.draw_rect_filled(posx + (x*cell_width), posy + (y*cell_height), cell_width, cell_height, gx.rgb(245, 245, 245))
 			gfx.draw_rect_empty(posx + (x*cell_width), posy + (y*cell_height), cell_width, cell_height, gx.rgb(115, 115, 115))
