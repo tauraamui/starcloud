@@ -5,6 +5,7 @@ import gx
 import op
 import sokol.sapp
 import time
+import math
 
 const (
 	cell_width = 80
@@ -18,6 +19,7 @@ mut:
 	position_x f32
 	position_y f32
 	time_left_pressed time.Time
+	time_since_left_clicked time.Time
 	left_down bool
 	right_down bool
 	is_selecting bool
@@ -188,23 +190,6 @@ fn (mut matrix Matrix) handle_mouse_down_event(ops op.Stack, e &gg.Event, scale 
 				}
 			}
 			return true
-			/*
-			matrix.tracked_time = time.now()
-			sapp.set_mouse_cursor(sapp.MouseCursor.crosshair)
-			matrix.is_selecting = true
-			matrix.is_dragging = false
-			matrix.selection_area = Span{
-				min: Pt{
-					x: e.mouse_x / scale,
-					y: e.mouse_y / scale
-				},
-				max: Pt{
-					x: e.mouse_x / scale,
-					y: e.mouse_y / scale
-				}
-			}
-			return true
-			*/
 		}
 		else {}
 	}
@@ -235,34 +220,23 @@ fn (mut matrix Matrix) handle_mouse_up_event(ops op.Stack, e &gg.Event, scale f3
 		matrix.is_selecting = false
 		matrix.resolve_selected_cells(ops)
 		matrix.selection_area = Span{ min: Pt{ -1, -1}, max: Pt{ -1, -1 } }
+
+		if time.since(matrix.time_since_left_clicked).milliseconds() <= 190 {
+			// double clicked handling
+			posx, posy := ops.offset(matrix.position_x, matrix.position_y)
+			position_within_matrix := widgets.Pt{x: e.mouse_x - posx, y: e.mouse_y - posy }
+			matrix.selected_cells = []
+			matrix.cell_in_edit_mode = widgets.Pt{ x: f32(math.floor(position_within_matrix.x / f32(cell_width))), y: f32(math.floor(position_within_matrix.y / f32(cell_height))) }
+		}
+		matrix.time_since_left_clicked = time.now()
 	}
 
 	if matrix.right_down {
 		matrix.right_down = false
 		sapp.set_mouse_cursor(sapp.MouseCursor.default)
 	}
+
 	return false
-	/*
-	// double clicked ?
-	if time.since(matrix.tracked_time).milliseconds() <= 200 {
-		matrix.is_selecting = false
-		matrix.fast_click_count += 1
-		if matrix.fast_click_count >= 2 {
-			posx, posy := ops.offset(matrix.position_x, matrix.position_y)
-			position_within_matrix := widgets.Pt{x: e.mouse_x - posx, y: e.mouse_y - posy }
-			matrix.selected_cells = []
-			matrix.cell_in_edit_mode = widgets.Pt{ x: f32(math.floor(position_within_matrix.x / f32(cell_width))), y: f32(math.floor(position_within_matrix.y / f32(cell_height))) }
-			matrix.fast_click_count = 0
-		}
-	}
-	sapp.set_mouse_cursor(sapp.MouseCursor.default)
-	matrix.is_dragging = false
-	if matrix.is_selecting {
-		matrix.is_selecting = false
-		matrix.resolve_selected_cells(ops)
-	}
-	return false
-	*/
 }
 
 fn (matrix Matrix) contains_point(ops op.Stack, pt_x f32, pt_y f32) bool {
