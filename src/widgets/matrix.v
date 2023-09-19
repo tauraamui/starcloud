@@ -255,7 +255,7 @@ fn (mut matrix Matrix) handle_mouse_up_event(ops op.Stack, e &gg.Event, scale f3
 fn (mut matrix Matrix) on_char(c string) {
 	x, y := matrix.cell_in_edit_mode.x, matrix.cell_in_edit_mode.y
 	if x != -1 && y != -1 {
-		matrix.mdata.insert_text_at(x, y, matrix.caret_position, c)
+		matrix.caret_position = matrix.mdata.insert_text_at(x, y, matrix.caret_position, c).len
 	}
 }
 

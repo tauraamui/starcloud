@@ -33,12 +33,12 @@ pub fn Matrix.new(rows int, cols int) Matrix {
 	}
 }
 
-pub fn (mut matrix Matrix) insert_text_at(x f32, y f32, pos int, s string) {
+pub fn (mut matrix Matrix) insert_text_at(x f32, y f32, pos int, s string) string {
 	xx, yy := int(math.floor(x)), int(math.floor(y))
 	index := xx + (matrix.width * yy)
 	line := matrix.data[index].to_str()
 	if line.len == 0 {
-		matrix.data[index] = '${s} '
+		matrix.data[index] = '${s}'
 	} else {
 		uline := line.runes()
 		mut upos := pos
@@ -49,6 +49,8 @@ pub fn (mut matrix Matrix) insert_text_at(x f32, y f32, pos int, s string) {
 		right := uline[pos..uline.len].string()
 		matrix.data[index] = '${left}${s}${right}'
 	}
+
+	return matrix.data[index].to_str()
 }
 
 pub fn (mut matrix Matrix) update_value(x f32, y f32, c string) {
