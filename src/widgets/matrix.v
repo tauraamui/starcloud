@@ -28,6 +28,7 @@ mut:
 	fast_click_count u8
 	double_clicked bool
 	cell_in_edit_mode Pt
+	caret_position int
 }
 
 pub struct Pt {
@@ -112,7 +113,8 @@ fn (mut matrix Matrix) draw(mut ops op.Stack, gfx &gg.Context) {
 		gfx.draw_text_def(int(posx + (x*cell_width))+x_offset, int(posy + (y*cell_height)+y_offset), matrix.mdata.get_value_as_str(x, y))
 		mut new_ops := op.Stack{}
 		new_ops.push_offset(posx+(x*cell_width), posy+(y*cell_height))
-		draw_editable_cell(new_ops, gfx)
+		edit_cell_posx, edit_cell_posy := new_ops.offset(3, 1)
+		gfx.draw_line(edit_cell_posx+matrix.caret_position, edit_cell_posy, edit_cell_posx+matrix.caret_position, edit_cell_posy+cell_height-3, gx.black)
 		new_ops.pop_offset()
 	}
 
@@ -122,11 +124,6 @@ fn (mut matrix Matrix) draw(mut ops op.Stack, gfx &gg.Context) {
 			gfx.draw_rect_filled(selection_area.min.x, selection_area.min.y, selection_area.max.x-selection_area.min.x, selection_area.max.y-selection_area.min.y, gx.rgba(224, 63, 222, 80))
 		}
 	}
-}
-
-fn draw_editable_cell(ops op.Stack, gfx &gg.Context) {
-	posx, posy := ops.offset(3, 1)
-	gfx.draw_line(posx, posy, posx, posy+cell_height-3, gx.black)
 }
 
 fn draw_rect_empty_with_thickness(gfx &gg.Context, x f32, y f32, w f32, h f32, t int, c gx.Color) {
@@ -189,6 +186,7 @@ fn (mut matrix Matrix) handle_mouse_down_event(ops op.Stack, e &gg.Event, scale 
 				position_within_matrix := widgets.Pt{x: (e.mouse_x / scale) - posx, y: (e.mouse_y / scale) - posy }
 				matrix.selected_cells = []
 				matrix.cell_in_edit_mode = widgets.Pt{ x: f32(math.floor(position_within_matrix.x / f32(cell_width))), y: f32(math.floor(position_within_matrix.y / f32(cell_height))) }
+				matrix.caret_position = matrix.mdata.get_value_as_str(matrix.cell_in_edit_mode.x, matrix.cell_in_edit_mode.y).len
 				return true
 			}
 
@@ -257,8 +255,7 @@ fn (mut matrix Matrix) handle_mouse_up_event(ops op.Stack, e &gg.Event, scale f3
 fn (mut matrix Matrix) on_char(c string) {
 	x, y := matrix.cell_in_edit_mode.x, matrix.cell_in_edit_mode.y
 	if x != -1 && y != -1 {
-		matrix.mdata.update_value(x, y, c)
-		println("CHAR: ${c}")
+		matrix.mdata.insert_text_at(x, y, matrix.caret_position, c)
 	}
 }
 

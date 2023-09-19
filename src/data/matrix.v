@@ -29,7 +29,25 @@ pub fn Matrix.new(rows int, cols int) Matrix {
 	return Matrix{
 		width: cols
 		height: rows
-		data: []Value{ len: rows * cols, init: 0 }
+		data: []Value{ len: rows * cols, init: '' }
+	}
+}
+
+pub fn (mut matrix Matrix) insert_text_at(x f32, y f32, pos int, s string) {
+	xx, yy := int(math.floor(x)), int(math.floor(y))
+	index := xx + (matrix.width * yy)
+	line := matrix.data[index].to_str()
+	if line.len == 0 {
+		matrix.data[index] = '${s} '
+	} else {
+		uline := line.runes()
+		mut upos := pos
+		if upos > uline.len {
+			upos = uline.len
+		}
+		left := uline[..upos].string()
+		right := uline[pos..uline.len].string()
+		matrix.data[index] = '${left}${s}${right}'
 	}
 }
 
