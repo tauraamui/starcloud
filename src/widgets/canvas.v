@@ -25,11 +25,14 @@ pub fn Canvas.new() Canvas {
 		matrices: [
 			Matrix{
 				position_x: 10, position_y: 10,
-				cols: 2, rows: 4,
 				cell_in_edit_mode: widgets.Pt{ x: -1, y: -1 }
-				mdata: data.Matrix.new(2, 4)
+				mdata: data.Matrix.new(4, 2)
+			},
+			Matrix{
+				position_x: 10, position_y: 180,
+				cell_in_edit_mode: widgets.Pt{ x: -1, y: -1 }
+				mdata: data.Matrix.new(60, 15)
 			}
-			Matrix{ position_x: 10, position_y: 180, cols: 15, rows: 60, cell_in_edit_mode: widgets.Pt{ x: -1, y: -1 }  }
 		]
 	}
 }

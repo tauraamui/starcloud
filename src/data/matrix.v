@@ -1,6 +1,6 @@
 module data
 
-type Value = string | u8
+type Value = string | u8 | f32
 
 pub struct Matrix {
 pub:
@@ -21,5 +21,6 @@ pub fn Matrix.new(rows int, cols int) Matrix {
 
 pub fn (mut matrix Matrix) update_value(x int, y int, c string) {
 	matrix.data[matrix.width * (x+y)] = c
+	// matrix.data[x + (matrix.width*y)] = c
 }
 

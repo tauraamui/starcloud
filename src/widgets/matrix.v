@@ -14,8 +14,6 @@ const (
 )
 
 struct Matrix {
-	cols int
-	rows int
 mut:
 	mdata data.Matrix
 	position_x f32
@@ -140,8 +138,8 @@ fn (mut matrix Matrix) resolve_selected_cells(ops op.Stack) {
 	selection_area := matrix.selection_area.normalise()
 	matrix.selected_cells = []
 	posx, posy := ops.offset(matrix.position_x, matrix.position_y)
-	for x in 0..matrix.cols {
-		for y in 0..matrix.rows {
+	for x in 0..matrix.mdata.width {
+		for y in 0..matrix.mdata.height {
 			min := Pt{ x: posx + (x*cell_width), y: posy + (y*cell_height) }
 			max := Pt{ x: min.x + cell_width, y: min.y + cell_height }
 			cell := Span{ min: min, max: max }
@@ -263,14 +261,14 @@ fn (matrix Matrix) contains_point(ops op.Stack, pt_x f32, pt_y f32) bool {
 
 fn (matrix Matrix) area(ops op.Stack) gg.Rect {
 	posx, posy := ops.offset(matrix.position_x, matrix.position_y)
-	width := matrix.cols * cell_width
-	height := matrix.rows * cell_height
+	width := matrix.mdata.width * cell_width
+	height := matrix.mdata.height * cell_height
 	return gg.Rect{ x: posx, y: posy, width: width, height: height }
 }
 
 fn (matrix Matrix) clip(posx f32, posy f32, gfx &gg.Context) {
-	width := matrix.cols * cell_width
-	height := matrix.rows * cell_height
+	width := matrix.mdata.width * cell_width
+	height := matrix.mdata.height * cell_height
 	gfx.scissor_rect(int(posx), int(posy), width, height)
 }
 
