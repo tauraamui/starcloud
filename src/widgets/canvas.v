@@ -31,7 +31,7 @@ pub fn Canvas.new() Canvas {
 			Matrix{
 				position_x: 10, position_y: 180,
 				cell_in_edit_mode: widgets.Pt{ x: -1, y: -1 }
-				mdata: data.Matrix.new(60, 15)
+				mdata: data.Matrix.new(25, 15)
 			}
 		]
 	}

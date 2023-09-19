@@ -90,6 +90,10 @@ fn (mut matrix Matrix) draw(mut ops op.Stack, gfx &gg.Context) {
 			if matrix.cell_in_edit_mode.x == x && matrix.cell_in_edit_mode.y == y { continue }
 			gfx.draw_rect_filled(posx + (x*cell_width), posy + (y*cell_height), cell_width, cell_height, gx.rgb(245, 245, 245))
 			gfx.draw_rect_empty(posx + (x*cell_width), posy + (y*cell_height), cell_width, cell_height, gx.rgb(115, 115, 115))
+
+			x_offset := 2
+			y_offset := (cell_height / 2) - (16 / 2)
+			gfx.draw_text_def(int(posx + (x*cell_width))+x_offset, int(posy + (y*cell_height)+y_offset), matrix.mdata.get_value_as_str(x, y))
 		}
 	}
 
@@ -103,6 +107,9 @@ fn (mut matrix Matrix) draw(mut ops op.Stack, gfx &gg.Context) {
 		x, y := matrix.cell_in_edit_mode.x, matrix.cell_in_edit_mode.y
 		gfx.draw_rect_filled(posx + (x*cell_width), posy + (y*cell_height), cell_width, cell_height, gx.rgb(235, 235, 235))
 		gfx.draw_rect_empty(posx + (x*cell_width), posy + (y*cell_height), cell_width, cell_height, gx.rgb(115, 115, 115))
+		x_offset := 2
+		y_offset := (cell_height / 2) - (16 / 2)
+		gfx.draw_text_def(int(posx + (x*cell_width))+x_offset, int(posy + (y*cell_height)+y_offset), matrix.mdata.get_value_as_str(x, y))
 		mut new_ops := op.Stack{}
 		new_ops.push_offset(posx+(x*cell_width), posy+(y*cell_height))
 		draw_editable_cell(new_ops, gfx)
@@ -247,8 +254,10 @@ fn (mut matrix Matrix) handle_mouse_up_event(ops op.Stack, e &gg.Event, scale f3
 	return false
 }
 
-fn (matrix Matrix) on_char(c string) {
-	if matrix.cell_in_edit_mode.x != -1 && matrix.cell_in_edit_mode.y != -1 {
+fn (mut matrix Matrix) on_char(c string) {
+	x, y := matrix.cell_in_edit_mode.x, matrix.cell_in_edit_mode.y
+	if x != -1 && y != -1 {
+		matrix.mdata.update_value(x, y, c)
 		println("CHAR: ${c}")
 	}
 }
