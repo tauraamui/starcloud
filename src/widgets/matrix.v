@@ -110,11 +110,13 @@ fn (mut matrix Matrix) draw(mut ops op.Stack, gfx &gg.Context) {
 		gfx.draw_rect_empty(posx + (x*cell_width), posy + (y*cell_height), cell_width, cell_height, gx.rgb(115, 115, 115))
 		x_offset := 2
 		y_offset := (cell_height / 2) - (16 / 2)
-		gfx.draw_text_def(int(posx + (x*cell_width))+x_offset, int(posy + (y*cell_height)+y_offset), matrix.mdata.get_value_as_str(x, y))
+		line := matrix.mdata.get_value_as_str(x, y)
+		gfx.draw_text_def(int(posx + (x*cell_width))+x_offset, int(posy + (y*cell_height)+y_offset), line)
 		mut new_ops := op.Stack{}
 		new_ops.push_offset(posx+(x*cell_width), posy+(y*cell_height))
-		edit_cell_posx, edit_cell_posy := new_ops.offset(3, 1)
-		gfx.draw_line(edit_cell_posx+matrix.caret_position, edit_cell_posy, edit_cell_posx+matrix.caret_position, edit_cell_posy+cell_height-3, gx.black)
+		mut edit_cell_posx, edit_cell_posy := new_ops.offset(3, 1)
+		edit_cell_posx += gfx.text_width(line)
+		gfx.draw_line(edit_cell_posx, edit_cell_posy, edit_cell_posx, edit_cell_posy+cell_height-3, gx.black)
 		new_ops.pop_offset()
 	}
 
