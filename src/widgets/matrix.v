@@ -29,6 +29,7 @@ mut:
 	double_clicked bool
 	cell_in_edit_mode Pt
 	caret_position int
+	consume_control_char bool
 }
 
 pub struct Pt {
@@ -254,7 +255,39 @@ fn (mut matrix Matrix) handle_mouse_up_event(ops op.Stack, e &gg.Event, scale f3
 	return false
 }
 
+fn (mut matrix Matrix) on_key_down(key gg.KeyCode, mod gg.Modifier) {
+	x, y := matrix.cell_in_edit_mode.x, matrix.cell_in_edit_mode.y
+	if x == -1 && y == -1 {
+		return
+	}
+	// TODO:(tauraamui) -> handle control key events
+	match key {
+		.backspace {
+			matrix.consume_control_char = true
+			matrix.backspace(x, y)
+			return
+		}
+		.enter {}
+		.escape {}
+		.tab {
+			// ved.view.insert_text('\t')
+		}
+		else {}
+	}
+}
+
+fn (mut matrix Matrix) backspace(cell_x f32, cell_y f32) {
+	x, y := matrix.cell_in_edit_mode.x, matrix.cell_in_edit_mode.y
+	if x != -1 && y != -1 {
+		matrix.mdata.remove_text_at(x, y, matrix.caret_position)
+	}
+}
+
 fn (mut matrix Matrix) on_char(c string) {
+	if matrix.consume_control_char {
+		matrix.consume_control_char
+		return
+	}
 	x, y := matrix.cell_in_edit_mode.x, matrix.cell_in_edit_mode.y
 	if x != -1 && y != -1 {
 		matrix.caret_position = matrix.mdata.insert_text_at(x, y, matrix.caret_position, c).len

@@ -85,7 +85,12 @@ pub fn (mut canvas Canvas) on_event(e &gg.Event, mut ops op.Stack) {
 	}
 }
 
-[manualfree]
+pub fn (mut canvas Canvas) on_key_down(key gg.KeyCode, mod gg.Modifier) {
+	for i := canvas.matrices.len-1; i >= 0; i-- {
+		canvas.matrices[i].on_key_down(key, mod)
+	}
+}
+
 pub fn (mut canvas Canvas) on_char(c u32) {
 	buf := [5]u8{}
 	s := unsafe { utf32_to_str_no_malloc(c, &buf[0]) }

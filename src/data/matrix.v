@@ -53,6 +53,21 @@ pub fn (mut matrix Matrix) insert_text_at(x f32, y f32, pos int, s string) strin
 	return matrix.data[index].to_str()
 }
 
+pub fn (mut matrix Matrix) remove_text_at(x f32, y f32, pos int) string {
+	xx, yy := int(math.floor(x)), int(math.floor(y))
+	index := xx + (matrix.width * yy)
+	line := matrix.data[index].to_str()
+	uline := line.runes()
+	left := uline[..pos - 1].string()
+	mut right := ''
+	if pos < uline.len {
+		right = uline[pos..].string()
+	}
+	matrix.data[index] = '${left}${right}'
+
+	return matrix.data[index].to_str()
+}
+
 pub fn (mut matrix Matrix) update_value(x f32, y f32, c string) {
 	ix, iy := int(math.floor(x)), int(math.floor(y))
 	matrix.data[ix + (matrix.width * iy)] = 4843
