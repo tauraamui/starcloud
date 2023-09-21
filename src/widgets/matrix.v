@@ -268,7 +268,10 @@ fn (mut matrix Matrix) on_key_down(key gg.KeyCode, mod gg.Modifier) {
 			return
 		}
 		.enter {}
-		.escape {}
+		.escape {
+			matrix.consume_control_char = true
+			matrix.cell_in_edit_mode = widgets.Pt{ -1, -1 }
+		}
 		.tab {
 			// ved.view.insert_text('\t')
 		}
@@ -285,7 +288,6 @@ fn (mut matrix Matrix) backspace(cell_x f32, cell_y f32) {
 
 fn (mut matrix Matrix) on_char(c string) {
 	if matrix.consume_control_char {
-		matrix.consume_control_char
 		matrix.consume_control_char = false
 		return
 	}
