@@ -69,13 +69,6 @@ pub fn (mut matrix Matrix) remove_text_at(x f32, y f32, pos int) string {
 	return matrix.data[index].to_str()
 }
 
-pub fn (mut matrix Matrix) update_value(x f32, y f32, c string) {
-	ix, iy := int(math.floor(x)), int(math.floor(y))
-	matrix.data[ix + (matrix.width * iy)] = 4843
-	// matrix.data[matrix.width * (ix+iy)] = c
-}
-
-
 pub fn (mut matrix Matrix) get_value_as_str(x f32, y f32) string {
 	ix, iy := int(math.floor(x)), int(math.floor(y))
 	return matrix.data[ix + (matrix.width * iy)].to_str()
