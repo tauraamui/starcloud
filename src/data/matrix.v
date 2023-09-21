@@ -58,6 +58,7 @@ pub fn (mut matrix Matrix) remove_text_at(x f32, y f32, pos int) string {
 	index := xx + (matrix.width * yy)
 	line := matrix.data[index].to_str()
 	uline := line.runes()
+	if pos == 0 { return uline.string() }
 	left := uline[..pos - 1].string()
 	mut right := ''
 	if pos < uline.len {

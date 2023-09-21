@@ -279,13 +279,14 @@ fn (mut matrix Matrix) on_key_down(key gg.KeyCode, mod gg.Modifier) {
 fn (mut matrix Matrix) backspace(cell_x f32, cell_y f32) {
 	x, y := matrix.cell_in_edit_mode.x, matrix.cell_in_edit_mode.y
 	if x != -1 && y != -1 {
-		matrix.mdata.remove_text_at(x, y, matrix.caret_position)
+		matrix.caret_position = matrix.mdata.remove_text_at(x, y, matrix.caret_position).len
 	}
 }
 
 fn (mut matrix Matrix) on_char(c string) {
 	if matrix.consume_control_char {
 		matrix.consume_control_char
+		matrix.consume_control_char = false
 		return
 	}
 	x, y := matrix.cell_in_edit_mode.x, matrix.cell_in_edit_mode.y
