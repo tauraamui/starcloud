@@ -7,11 +7,7 @@ import sokol.sapp
 import time
 import math
 import data
-
-const (
-	cell_width = 80
-	cell_height = 20
-)
+import draw
 
 struct Matrix {
 mut:
@@ -84,26 +80,32 @@ fn (mut matrix Matrix) draw(mut ops op.Stack, gfx &gg.Context) {
 			sapp.set_mouse_cursor(sapp.MouseCursor.crosshair)
 		}
 	}
-	posx, posy := ops.offset(matrix.position_x, matrix.position_y)
-	matrix.clip(posx, posy, gfx) // TODO:(tauraamui) -> expand clip by 1 px to allow for elapsed cell border draws
+
+	clipx, clipy := ops.offset(matrix.position_x, matrix.position_y)
+	matrix.clip(clipx, clipy, gfx) // TODO:(tauraamui) -> expand clip by 1 px to allow for elapsed cell border draws
 	defer { matrix.noclip(gfx) }
+	ops.push_offset(matrix.position_x, matrix.position_y)
 	for x in 0..matrix.mdata.width {
 		for y in 0..matrix.mdata.height {
 			if matrix.cell_in_edit_mode.x == x && matrix.cell_in_edit_mode.y == y { continue }
-			gfx.draw_rect_filled(posx + (x*cell_width), posy + (y*cell_height), cell_width, cell_height, gx.rgb(245, 245, 245))
-			gfx.draw_rect_empty(posx + (x*cell_width), posy + (y*cell_height), cell_width, cell_height, gx.rgb(115, 115, 115))
+			posx, posy := ops.offset(x*draw.cell_width, y*draw.cell_height)
+			draw.default_cell(gfx, posx, posy)
 
+			/*
 			x_offset := 2
-			y_offset := (cell_height / 2) - (16 / 2)
+			y_offset := (draw.cell_height / 2) - (16 / 2)
 			gfx.draw_text_def(int(posx + (x*cell_width))+x_offset, int(posy + (y*cell_height)+y_offset), matrix.mdata.get_value_as_str(x, y))
+			*/
 		}
 	}
 
 	for _, cell in matrix.selected_cells {
 		x, y := cell.x, cell.y
-		gfx.draw_rect_filled(posx + (x*cell_width), posy + (y*cell_height), cell_width, cell_height, gx.rgba(255, 64, 188, 25))
-		gfx.draw_rect_empty(posx + (x*cell_width), posy + (y*cell_height), cell_width, cell_height, gx.rgb(255, 64, 188))
+		posx, posy := ops.offset(x*draw.cell_width, y*draw.cell_height)
+		draw.selected_cell(gfx, posx, posy)
 	}
+	ops.pop_offset()
+	/*
 
 	if matrix.cell_in_edit_mode.x > -1 && matrix.cell_in_edit_mode.y > -1 {
 		x, y := matrix.cell_in_edit_mode.x, matrix.cell_in_edit_mode.y
@@ -120,6 +122,7 @@ fn (mut matrix Matrix) draw(mut ops op.Stack, gfx &gg.Context) {
 		gfx.draw_line(edit_cell_posx, edit_cell_posy, edit_cell_posx, edit_cell_posy+cell_height-3, gx.black)
 		new_ops.pop_offset()
 	}
+	*/
 
 	if matrix.is_selecting {
 		selection_area := matrix.selection_area.normalise()
@@ -147,8 +150,8 @@ fn (mut matrix Matrix) resolve_selected_cells(ops op.Stack) {
 	posx, posy := ops.offset(matrix.position_x, matrix.position_y)
 	for x in 0..matrix.mdata.width {
 		for y in 0..matrix.mdata.height {
-			min := Pt{ x: posx + (x*cell_width), y: posy + (y*cell_height) }
-			max := Pt{ x: min.x + cell_width, y: min.y + cell_height }
+			min := Pt{ x: posx + (x*draw.cell_width), y: posy + (y*draw.cell_height) }
+			max := Pt{ x: min.x + draw.cell_width, y: min.y + draw.cell_height }
 			cell := Span{ min: min, max: max }
 			if cell.overlaps(selection_area) {
 				matrix.selected_cells << Pt{ x: x, y: y }
@@ -188,14 +191,14 @@ fn (mut matrix Matrix) handle_mouse_down_event(ops op.Stack, e &gg.Event, scale 
 				posx, posy := ops.offset(matrix.position_x, matrix.position_y)
 				position_within_matrix := widgets.Pt{x: (e.mouse_x / scale) - posx, y: (e.mouse_y / scale) - posy }
 				matrix.selected_cells = []
-				matrix.cell_in_edit_mode = widgets.Pt{ x: f32(math.floor(position_within_matrix.x / f32(cell_width))), y: f32(math.floor(position_within_matrix.y / f32(cell_height))) }
+				matrix.cell_in_edit_mode = widgets.Pt{ x: f32(math.floor(position_within_matrix.x / f32(draw.cell_width))), y: f32(math.floor(position_within_matrix.y / f32(draw.cell_height))) }
 				matrix.caret_position = matrix.mdata.get_value_as_str(matrix.cell_in_edit_mode.x, matrix.cell_in_edit_mode.y).len
 				return true
 			}
 
 			posx, posy := ops.offset(matrix.position_x, matrix.position_y)
 			position_within_matrix := widgets.Pt{x: (e.mouse_x / scale) - posx, y: (e.mouse_y / scale) - posy }
-			pressed_cell := widgets.Pt{ x: f32(math.floor(position_within_matrix.x / f32(cell_width))), y: f32(math.floor(position_within_matrix.y / f32(cell_height))) }
+			pressed_cell := widgets.Pt{ x: f32(math.floor(position_within_matrix.x / f32(draw.cell_width))), y: f32(math.floor(position_within_matrix.y / f32(draw.cell_height))) }
 			if pressed_cell.x != matrix.cell_in_edit_mode.x && pressed_cell.y != matrix.cell_in_edit_mode.y {
 				matrix.cell_in_edit_mode = widgets.Pt{ x: -1, y: -1 }
 			}
@@ -305,14 +308,14 @@ fn (matrix Matrix) contains_point(ops op.Stack, pt_x f32, pt_y f32) bool {
 
 fn (matrix Matrix) area(ops op.Stack) gg.Rect {
 	posx, posy := ops.offset(matrix.position_x, matrix.position_y)
-	width := matrix.mdata.width * cell_width
-	height := matrix.mdata.height * cell_height
+	width := matrix.mdata.width * draw.cell_width
+	height := matrix.mdata.height * draw.cell_height
 	return gg.Rect{ x: posx, y: posy, width: width, height: height }
 }
 
 fn (matrix Matrix) clip(posx f32, posy f32, gfx &gg.Context) {
-	width := matrix.mdata.width * cell_width
-	height := matrix.mdata.height * cell_height
+	width := matrix.mdata.width * draw.cell_width
+	height := matrix.mdata.height * draw.cell_height
 	gfx.scissor_rect(int(posx), int(posy), width, height)
 }
 
