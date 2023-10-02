@@ -127,7 +127,8 @@ fn (mut matrix Matrix) draw(mut ops op.Stack, gfx &gg.Context) {
 	if matrix.is_selecting {
 		selection_area := matrix.selection_area.normalise()
 		if !selection_area.empty() {
-			gfx.draw_rect_filled(selection_area.min.x, selection_area.min.y, selection_area.max.x-selection_area.min.x, selection_area.max.y-selection_area.min.y, gx.rgba(224, 63, 222, 80))
+			width, height := selection_area.max.x-selection_area.min.x, selection_area.max.y-selection_area.min.y
+			gfx.draw_rect_filled(selection_area.min.x, selection_area.min.y, width, height, gx.rgba(224, 63, 222, 80))
 		}
 	}
 }
