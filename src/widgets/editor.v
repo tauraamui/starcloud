@@ -27,7 +27,7 @@ mut:
 
 fn (editor Editor) draw(ops op.Stack, gfx &gg.Context) {
 	posx, posy := ops.offset(editor.area.pos.x, editor.area.pos.y)
-	draw.rect(gfx, posx, posy, editor.area.size.x, editor.area.size.y, editor.bg_color)
+	draw.cell(gfx, posx, posy, editor.bg_color, draw.default_cell_border_color)
 }
 
 fn (mut editor Editor) on_key_down(key gg.KeyCode, mod gg.Modifier) {

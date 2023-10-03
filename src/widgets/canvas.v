@@ -1,9 +1,11 @@
 module widgets
 
 import gg
+import gx
 import op
 import sokol.sapp
 import data
+import draw
 
 [heap]
 pub struct Canvas {
@@ -27,11 +29,19 @@ pub fn Canvas.new() Canvas {
 				position_x: 10, position_y: 10,
 				cell_in_edit_mode: widgets.Pt{ x: -1, y: -1 }
 				mdata: data.Matrix.new(4, 2)
+				editor: Editor{
+					area: Area{ size: Pt{ x: draw.cell_width, y: draw.cell_height} }
+					bg_color: gx.rgb(206, 160, 242)
+				}
 			},
 			Matrix{
 				position_x: 10, position_y: 180,
 				cell_in_edit_mode: widgets.Pt{ x: -1, y: -1 }
 				mdata: data.Matrix.new(25, 15)
+				editor: Editor{
+					area: Area{ size: Pt{ x: draw.cell_width, y: draw.cell_height} }
+					bg_color: gx.rgb(206, 160, 242)
+				}
 			}
 		]
 	}

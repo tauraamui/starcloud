@@ -105,9 +105,15 @@ fn (mut matrix Matrix) draw(mut ops op.Stack, gfx &gg.Context) {
 		posx, posy := ops.offset(x*draw.cell_width, y*draw.cell_height)
 		draw.selected_cell(gfx, posx, posy)
 	}
-	ops.pop_offset()
 
-	matrix.editor.draw(ops, gfx)
+	if matrix.cell_in_edit_mode.x > -1 && matrix.cell_in_edit_mode.y > -1 {
+		x, y := matrix.cell_in_edit_mode.x, matrix.cell_in_edit_mode.y
+		ops.push_offset(x * draw.cell_width, y * draw.cell_height)
+		matrix.editor.draw(ops, gfx)
+		ops.pop_offset()
+	}
+
+	ops.pop_offset()
 	/*
 
 	if matrix.cell_in_edit_mode.x > -1 && matrix.cell_in_edit_mode.y > -1 {
