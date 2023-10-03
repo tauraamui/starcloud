@@ -12,20 +12,21 @@ import draw
 struct Matrix {
 mut:
 	mdata data.Matrix
-	position_x f32
-	position_y f32
-	time_left_pressed time.Time
+	position_x              f32
+	position_y              f32
+	time_left_pressed       time.Time
 	time_since_left_clicked time.Time
-	left_down bool
-	right_down bool
-	is_selecting bool
-	selection_area Span
-	selected_cells []Pt
-	fast_click_count u8
-	double_clicked bool
-	cell_in_edit_mode Pt
-	caret_position int
-	consume_control_char bool
+	left_down               bool
+	right_down              bool
+	is_selecting            bool
+	selection_area          Span
+	selected_cells          []Pt
+	fast_click_count        u8
+	double_clicked          bool
+	cell_in_edit_mode       Pt
+	caret_position          int
+	consume_control_char    bool
+	editor                  Editor
 }
 
 pub struct Pt {
@@ -105,6 +106,8 @@ fn (mut matrix Matrix) draw(mut ops op.Stack, gfx &gg.Context) {
 		draw.selected_cell(gfx, posx, posy)
 	}
 	ops.pop_offset()
+
+	matrix.editor.draw(ops, gfx)
 	/*
 
 	if matrix.cell_in_edit_mode.x > -1 && matrix.cell_in_edit_mode.y > -1 {
@@ -260,37 +263,35 @@ fn (mut matrix Matrix) handle_mouse_up_event(ops op.Stack, e &gg.Event, scale f3
 }
 
 fn (mut matrix Matrix) on_key_down(key gg.KeyCode, mod gg.Modifier) {
+	/*
 	x, y := matrix.cell_in_edit_mode.x, matrix.cell_in_edit_mode.y
 	if x == -1 && y == -1 {
 		return
 	}
+	*/
 	// TODO:(tauraamui) -> handle control key events
 	match key {
-		.backspace {
-			matrix.consume_control_char = true
-			matrix.backspace(x, y)
-			return
-		}
-		.enter {}
 		.escape {
-			matrix.consume_control_char = true
 			matrix.cell_in_edit_mode = widgets.Pt{ -1, -1 }
 		}
-		.tab {
-			// ved.view.insert_text('\t')
+		else {
+			matrix.editor.on_key_down(key, mod)
 		}
-		else {}
 	}
 }
 
-fn (mut matrix Matrix) backspace(cell_x f32, cell_y f32) {
+fn (mut matrix Matrix) backspace() {
+	matrix.editor.backspace()
+	/*
 	x, y := matrix.cell_in_edit_mode.x, matrix.cell_in_edit_mode.y
 	if x != -1 && y != -1 {
 		matrix.caret_position = matrix.mdata.remove_text_at(x, y, matrix.caret_position).len
 	}
+	*/
 }
 
 fn (mut matrix Matrix) on_char(c string) {
+	matrix.editor.on_char(c)
 	if matrix.consume_control_char {
 		matrix.consume_control_char = false
 		return
