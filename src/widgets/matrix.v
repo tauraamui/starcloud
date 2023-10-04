@@ -131,7 +131,7 @@ fn (mut matrix Matrix) draw(mut ops op.Stack, gfx &gg.Context) {
 	if matrix.cell_in_edit_mode.x > -1 && matrix.cell_in_edit_mode.y > -1 {
 		x, y := matrix.cell_in_edit_mode.x, matrix.cell_in_edit_mode.y
 		ops.push_offset(x * draw.cell_width, y * draw.cell_height)
-		matrix.editor.draw(ops, gfx, matrix.mdata.get_value_as_str(x, y))
+		matrix.editor.draw(ops, gfx)
 		ops.pop_offset()
 	}
 
@@ -224,7 +224,7 @@ fn (mut matrix Matrix) handle_mouse_down_event(ops op.Stack, e &gg.Event, scale 
 				position_within_matrix := widgets.Pt{x: (e.mouse_x / scale) - posx, y: (e.mouse_y / scale) - posy }
 				matrix.selected_cells = []
 				matrix.cell_in_edit_mode = widgets.Pt{ x: f32(math.floor(position_within_matrix.x / f32(draw.cell_width))), y: f32(math.floor(position_within_matrix.y / f32(draw.cell_height))) }
-				matrix.caret_position = matrix.mdata.get_value_as_str(matrix.cell_in_edit_mode.x, matrix.cell_in_edit_mode.y).len
+				matrix.editor.line = Line{ data: matrix.mdata.get_value_as_str(matrix.cell_in_edit_mode.x, matrix.cell_in_edit_mode.y) }
 				return true
 			}
 
@@ -233,6 +233,7 @@ fn (mut matrix Matrix) handle_mouse_down_event(ops op.Stack, e &gg.Event, scale 
 			pressed_cell := widgets.Pt{ x: f32(math.floor(position_within_matrix.x / f32(draw.cell_width))), y: f32(math.floor(position_within_matrix.y / f32(draw.cell_height))) }
 			if pressed_cell.x != matrix.cell_in_edit_mode.x && pressed_cell.y != matrix.cell_in_edit_mode.y {
 				matrix.cell_in_edit_mode = widgets.Pt{ x: -1, y: -1 }
+				matrix.editor.line = Line{}
 			}
 
 			matrix.time_left_pressed = time.now()
@@ -320,14 +321,6 @@ fn (mut matrix Matrix) backspace() {
 
 fn (mut matrix Matrix) on_char(c string) {
 	matrix.editor.on_char(c)
-	if matrix.consume_control_char {
-		matrix.consume_control_char = false
-		return
-	}
-	x, y := matrix.cell_in_edit_mode.x, matrix.cell_in_edit_mode.y
-	if x != -1 && y != -1 {
-		matrix.caret_position = matrix.mdata.insert_text_at(x, y, matrix.caret_position, c).len
-	}
 }
 
 fn (matrix Matrix) contains_point(ops op.Stack, pt_x f32, pt_y f32) bool {

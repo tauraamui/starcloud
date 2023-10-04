@@ -28,10 +28,10 @@ mut:
 	data string
 }
 
-fn (editor Editor) draw(ops op.Stack, gfx &gg.Context, text string) {
+fn (editor Editor) draw(ops op.Stack, gfx &gg.Context) {
 	posx, posy := ops.offset(editor.area.pos.x, editor.area.pos.y)
 	draw.cell(gfx, posx, posy, editor.bg_color, draw.default_cell_border_color)
-	gfx.draw_text_def(int(posx), int(posy), text)
+	gfx.draw_text_def(int(posx), int(posy), editor.line.data)
 }
 
 fn (mut editor Editor) on_key_down(key gg.KeyCode, mod gg.Modifier) {
@@ -60,7 +60,7 @@ fn (mut editor Editor) on_char(c string) {
 		matrix.caret_position = matrix.mdata.insert_text_at(x, y, matrix.caret_position, c).len
 	}
 	*/
-	editor.line.insert_text_at(0, c)
+	editor.line.insert_text_at(editor.line.data.len, c)
 	editor.on_value_change_fn(editor.line.data, editor.user_data)
 }
 
