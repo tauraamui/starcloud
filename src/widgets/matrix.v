@@ -9,26 +9,6 @@ import math
 import data
 import draw
 
-struct Matrix {
-mut:
-	mdata data.Matrix
-	position_x              f32
-	position_y              f32
-	time_left_pressed       time.Time
-	time_since_left_clicked time.Time
-	left_down               bool
-	right_down              bool
-	is_selecting            bool
-	selection_area          Span
-	selected_cells          []Pt
-	fast_click_count        u8
-	double_clicked          bool
-	cell_in_edit_mode       Pt
-	caret_position          int
-	consume_control_char    bool
-	editor                  Editor
-}
-
 pub struct Pt {
 pub mut:
 	x f32
@@ -73,6 +53,43 @@ fn (span Span) overlaps(s Span) bool {
 struct Cell {
 	x int
 	y int
+}
+
+struct Matrix {
+mut:
+	mdata data.Matrix
+	position_x              f32
+	position_y              f32
+	time_left_pressed       time.Time
+	time_since_left_clicked time.Time
+	left_down               bool
+	right_down              bool
+	is_selecting            bool
+	selection_area          Span
+	selected_cells          []Pt
+	fast_click_count        u8
+	double_clicked          bool
+	cell_in_edit_mode       Pt
+	caret_position          int
+	consume_control_char    bool
+	editor                  Editor
+}
+
+pub fn Matrix.new(pos_x f32, pos_y f32, width int, height int) &Matrix {
+	mut mat := &Matrix{
+		position_x: pos_x, position_y: pos_y
+		cell_in_edit_mode: Pt{ x: -1, y: -1 }
+		mdata: data.Matrix.new(width, height)
+	}
+	mat.editor = Editor {
+		user_data: mat
+		on_value_change_fn: on_value_change
+	}
+	return mat
+}
+
+fn on_value_change(value string, mut mat &Matrix) {
+	println("changed value: ${value}")
 }
 
 fn (mut matrix Matrix) draw(mut ops op.Stack, gfx &gg.Context) {

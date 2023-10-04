@@ -14,10 +14,13 @@ struct Editor {
 	area                 Area
 	bg_color             gx.Color
 	txt_color            gx.Color
-	line                 Line
+	on_value_change_fn   fn (value string, d voidptr) = unsafe { nil }
+	user_data            voidptr = unsafe { nil }
+
 mut:
 	consume_control_char bool
 	active               bool
+	line                 Line
 }
 
 struct Line {
@@ -56,6 +59,8 @@ fn (mut editor Editor) on_char(c string) {
 		matrix.caret_position = matrix.mdata.insert_text_at(x, y, matrix.caret_position, c).len
 	}
 	*/
+	editor.line.insert_text_at(0, c)
+	editor.on_value_change_fn(editor.line.data, editor.user_data)
 }
 
 fn (mut line Line) insert_text_at(pos int, s string) string {

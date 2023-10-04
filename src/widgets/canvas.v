@@ -12,7 +12,7 @@ pub struct Canvas {
 mut:
 	world_offset_x f32
 	world_offset_y f32
-	matrices []Matrix
+	matrices []&Matrix
 	is_dragging bool
 	zoom_percentage f32
 	scale f32
@@ -25,15 +25,9 @@ pub fn Canvas.new() Canvas {
 		world_offset_x: 20
 		world_offset_y: 0
 		matrices: [
-			Matrix{
-				position_x: 10, position_y: 10,
-				cell_in_edit_mode: widgets.Pt{ x: -1, y: -1 }
-				mdata: data.Matrix.new(4, 2)
-				editor: Editor{
-					area: Area{ size: Pt{ x: draw.cell_width, y: draw.cell_height} }
-					bg_color: gx.rgb(206, 160, 242)
-				}
-			},
+			Matrix.new(10, 10, 4, 2),
+			Matrix.new(10, 180, 25, 15)
+			/*
 			Matrix{
 				position_x: 10, position_y: 180,
 				cell_in_edit_mode: widgets.Pt{ x: -1, y: -1 }
@@ -43,6 +37,7 @@ pub fn Canvas.new() Canvas {
 					bg_color: gx.rgb(206, 160, 242)
 				}
 			}
+			*/
 		]
 	}
 }
