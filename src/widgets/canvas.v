@@ -27,17 +27,6 @@ pub fn Canvas.new() Canvas {
 		matrices: [
 			Matrix.new(10, 10, 4, 2),
 			Matrix.new(10, 180, 25, 15)
-			/*
-			Matrix{
-				position_x: 10, position_y: 180,
-				cell_in_edit_mode: widgets.Pt{ x: -1, y: -1 }
-				mdata: data.Matrix.new(25, 15)
-				editor: Editor{
-					area: Area{ size: Pt{ x: draw.cell_width, y: draw.cell_height} }
-					bg_color: gx.rgb(206, 160, 242)
-				}
-			}
-			*/
 		]
 	}
 }

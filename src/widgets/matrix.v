@@ -84,12 +84,17 @@ pub fn Matrix.new(pos_x f32, pos_y f32, width int, height int) &Matrix {
 	mat.editor = Editor {
 		user_data: mat
 		on_value_change_fn: on_value_change
+		area: Area{ size: Pt{ x: draw.cell_width, y: draw.cell_height} }
+		bg_color: gx.rgb(206, 160, 242)
 	}
 	return mat
 }
 
 fn on_value_change(value string, mut mat &Matrix) {
-	println("changed value: ${value}")
+	if mat.cell_in_edit_mode.x > -1 && mat.cell_in_edit_mode.y > -1 {
+		x, y := mat.cell_in_edit_mode.x, mat.cell_in_edit_mode.y
+		mat.mdata.set_value_at(x, y, value)
+	}
 }
 
 fn (mut matrix Matrix) draw(mut ops op.Stack, gfx &gg.Context) {
@@ -126,7 +131,7 @@ fn (mut matrix Matrix) draw(mut ops op.Stack, gfx &gg.Context) {
 	if matrix.cell_in_edit_mode.x > -1 && matrix.cell_in_edit_mode.y > -1 {
 		x, y := matrix.cell_in_edit_mode.x, matrix.cell_in_edit_mode.y
 		ops.push_offset(x * draw.cell_width, y * draw.cell_height)
-		matrix.editor.draw(ops, gfx)
+		matrix.editor.draw(ops, gfx, matrix.mdata.get_value_as_str(x, y))
 		ops.pop_offset()
 	}
 

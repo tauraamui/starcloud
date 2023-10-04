@@ -33,6 +33,12 @@ pub fn Matrix.new(rows int, cols int) Matrix {
 	}
 }
 
+pub fn (mut matrix Matrix) set_value_at(x f32, y f32, s string) {
+	xx, yy := int(math.floor(x)), int(math.floor(y))
+	index := xx + (matrix.width * yy)
+	matrix.data[index] = s
+}
+
 pub fn (mut matrix Matrix) insert_text_at(x f32, y f32, pos int, s string) string {
 	xx, yy := int(math.floor(x)), int(math.floor(y))
 	index := xx + (matrix.width * yy)

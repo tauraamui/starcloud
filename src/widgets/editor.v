@@ -28,9 +28,10 @@ mut:
 	data string
 }
 
-fn (editor Editor) draw(ops op.Stack, gfx &gg.Context) {
+fn (editor Editor) draw(ops op.Stack, gfx &gg.Context, text string) {
 	posx, posy := ops.offset(editor.area.pos.x, editor.area.pos.y)
 	draw.cell(gfx, posx, posy, editor.bg_color, draw.default_cell_border_color)
+	gfx.draw_text_def(int(posx), int(posy), text)
 }
 
 fn (mut editor Editor) on_key_down(key gg.KeyCode, mod gg.Modifier) {
